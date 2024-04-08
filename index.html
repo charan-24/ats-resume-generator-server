@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <!-- <button class="btn">pay 2499</button>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script>
+        const btn = document.body.querySelector('.btn');
+        const fullname = 'Charan';
+        const email = 'saicharan@jacinthpaul.com';
+        const phone = '7702117413';
+        const amount = 500;
+        const user_id = 6;
+        // var orderid = '';
+        // console.log(fullname);
+        
+
+        // console.log(options);
+
+        btn.addEventListener('click', async (e) => {
+            const response = await fetch('http://localhost:5000/payment/createOrder', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    user_id: user_id,
+                    amount: amount
+                })
+            })
+
+            const order = await response.json();
+            console.log(order);
+            console.log(order.id);
+
+            var options = {
+                "key": "rzp_test_C6N8k4gJtSZVZv", // Enter the Key ID generated from the Dashboard
+                "amount": amount*100, // Amount is in currency subunits. Default currency is INR. Hence, 50000 refers to 50000 paise
+                "currency": "INR",
+                "name": "Acme Corp", //your business name
+                "description": "Test Transaction",
+                "image": "https://example.com/your_logo",
+                "order_id": order.id, //This is a sample Order ID. Pass the `id` obtained in the response of Step 1
+                "handler": async function (response){
+                    // alert(response.razorpay_payment_id);
+                    // alert(response.razorpay_order_id);
+                    // alert(response.razorpay_signature);
+                    const body = {
+                        user_id: user_id,
+                        amount: amount,
+                        payment_id: response.razorpay_payment_id,
+                        order_id: response.razorpay_order_id,
+                        signature: response.razorpay_signature
+                    }
+                    const valres = await fetch('http://localhost:5000/payment/validatePayment', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(body)
+                    })
+                    const res = await valres.json();
+                    console.log(res);
+                },
+                "prefill": { //We recommend using the prefill parameter to auto-fill customer's contact information, especially their phone number
+                    "name": fullname, //your customer's name
+                    "email": email, 
+                    "contact": phone  //Provide the customer's phone number for better conversion rates 
+                },
+                "notes": {
+                    "address": "Razorpay Corporate Office"
+                },
+                "theme": {
+                    "color": "#3399cc"
+                }
+            };
+
+            console.log(options);
+            var rzp1 = new Razorpay(options);
+            rzp1.on('payment.failed', function (response){
+                    alert(response.error.code);
+                    alert(response.error.description);
+                    alert(response.error.source);
+                    alert(response.error.step);
+                    alert(response.error.reason);
+                    alert(response.error.metadata.order_id);
+                    alert(response.error.metadata.payment_id);
+            });
+            rzp1.open();
+            // e.preventDefault();
+        }); 
+    </script>-->
+
+</body>
+</html>
