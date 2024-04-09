@@ -5,7 +5,7 @@ const asyncHandler = require('express-async-handler');
 
 
 //getting userdetails from database
-const getuserDetails = asyncHandler(async (req, res) => {
+const getUsers = asyncHandler(async (req, res) => {
     const sql = `select * from userDetails`;
     const result = await db.query(sql)
                             .catch(err => {
@@ -296,7 +296,7 @@ const adminLogin = asyncHandler(async(req,res)=>{
 
 
 module.exports = {
-    getuserDetails,
+    getUsers,
     addjobroles,
     getAllJobs,
     addAJob,

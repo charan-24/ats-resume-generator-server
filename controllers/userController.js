@@ -129,7 +129,7 @@ const userRegistration = asyncHandler(async (req, res) => {
 const selectPreferredRoles = asyncHandler(async(req,res)=>{
     const {user_id,preferredroles} = req.body;
     if(!preferredroles){
-        return res.status(401).json({message:"not data"});
+        return res.status(401).json({message:"no data"});
     }
 
     let userpreferences = await db.query(`select * from preferredjobroles where user_id = ?`,[user_id])
@@ -174,14 +174,15 @@ const selectPreferredRoles = asyncHandler(async(req,res)=>{
 });
 
 const editUserProfile = asyncHandler(async(req,res)=>{
-    const {user_id,changesobj} = req.body;
-    // console.log(changesobj);
+    const changesobj = req.body;
+    console.log(req.body);
+    const user_id = changesobj.user_id;
     if(!changesobj || !user_id){
             return res.status(401).json({message:"no data provided"});
     }
     if(changesobj.password){
-        const hashpassword = await bcrypt.hash(changesobj.password,11);
-        const changepwd = await db.query(`update useraccounts set ? where user_id = ?`,[{password: hashpassword},user_id])
+        const hashpassword = await bcrypt.hash(changesobj.password,parseInt(saltRounds));
+        const changepwd = await db.query(`update useraccounts set ? where user_id = ?`,[{password: hashpassword},parseInt(user_id)])
                                     .catch(err=>{
                                         return res.status(400).json({message:err.sqlMessage});
                                     })
@@ -219,6 +220,9 @@ const editUserProfile = asyncHandler(async(req,res)=>{
     const education = {};
     for(let key in changesobj){
         if(key === "qualification" || key === "specialization" || key === "college_name" || key ==="year_of_grad" || key === "cgpa_or_percentage"){
+            if(key === "cgpa_or_percentage"){
+                education[`${key}`] = parseFloat(changesobj[key]);
+            }
             education[`${key}`]=changesobj[key]
         }
     }
@@ -237,14 +241,17 @@ const editUserProfile = asyncHandler(async(req,res)=>{
 });
 
 const addWorkExp = asyncHandler(async(req,res)=>{
-    const workexp =req.body;
+    const workexp = req.body;
+    console.log(req.body);
+    if(!workexp || !Object.keys(workexp).length){
+        return res.status(400).json("empty");
+    }
     const sql = `insert into workexperience set ?`;
     const addwork = await db.query(sql,workexp)
                             .catch(err=>{
                                 return res.status(400).json({message:err.sqlMessage});
                             })
-    return res.status(200).json({message:"workexp added"});
-
+    return res.status(200).json("workadded");
 });
 
 const deleteWorkExp = asyncHandler(async(req,res)=>{
@@ -313,7 +320,7 @@ const getPreferredJobs = asyncHandler(async(req,res)=>{
 
 const addProject = asyncHandler(async(req,res)=>{
     const {project} = req.body;
-    // console.log(project);
+    console.log(project);
     if(!project || !Object.keys(project).length){
         return res.status(400).json({message:"empty project data"});
     }
@@ -381,7 +388,50 @@ const getUserCertificates = asyncHandler(async(req,res)=>{
                                 });
     // console.log(resumes[0]);
     return res.status(200).json(certificates);
-})
+});
+
+const getUserDetails = asyncHandler(async(req,res)=>{
+    const {userid} = req.params;
+    if(!userid){
+        return res.status(400).json("no userid");
+    }
+
+    const [details] = await db.query('select * from userdetails where user_id = ?',[userid])
+                            .catch(err=>{
+                                return res.status(400).json(err.sqlMessage);
+                            })
+    const [education] = await db.query('select * from educationaldetails where user_id = ?',[userid])
+                                .catch(err=>{
+                                    return res.status(400).json(err.sqlMessage);
+                                });
+    const [resumes] = await db.query('select resumeplan,resumesused from subscriptions where user_id = ?',[userid])
+                                .catch(err=>{
+                                    return res.status(400).json(err.sqlMessage);
+                                });
+
+    const projects = await db.query('select * from userprojects where user_id = ?',[userid])
+                                .catch(err=>{
+                                    return res.status(400).json(err.sqlMessage);
+                                });
+    const workexp = await db.query('select * from workexperience where user_id = ?',[userid])
+                                .catch(err=>{
+                                    return res.status(400).json(err.sqlMessage);
+                                });
+    const certificates = await db.query('select * from usercertificates where user_id = ?',[userid])
+                            .catch(err=>{
+                                return res.status(400).json(err.sqlMessage);
+                            });
+    
+    
+    let overview = {};
+    overview["details"] = details[0];
+    overview["resumes"] = resumes[0];
+    overview["education"] = education[0];
+    overview["projects"] = projects[0];
+    overview["workexp"] = workexp[0];
+    overview["certificates"] = certificates[0];
+    return res.status(200).json(overview);
+});
 
 module.exports = {
     userRegistration,
@@ -395,5 +445,6 @@ module.exports = {
     getuserprojects,
     addCertificate,
     getUserResumes,
-    getUserCertificates
+    getUserCertificates,
+    getUserDetails
 }
