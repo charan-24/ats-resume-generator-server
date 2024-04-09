@@ -18,5 +18,6 @@ router.get('/getuserprojects/:userid',userController.getuserprojects);
 router.post('/addCertificate',userController.addCertificate);
 router.get('/getUserResumes/:userid',userController.getUserResumes);
 router.get('/getUserCertificates/:userid',userController.getUserCertificates);
+router.get('/getUserDetails/:userid',userController.getUserDetails);
 
 module.exports = router;

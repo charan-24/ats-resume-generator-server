@@ -2,10 +2,9 @@ const asyncHandler = require('express-async-handler');
 const db = require('../database/database');
 
 const submitFeedback = asyncHandler(async(req,res)=>{
-    const {user_id,username,fullname,email,category,subject,description,urgency,contact_method} = req.body;
+    const {user_id,fullname,email,category,subject,description,urgency,contact_method} = req.body;
     const feedbackobj = {
         "user_id":user_id,
-        "username":username,
         "fullname":fullname,
         "email":email,
         "category":category,

@@ -7,7 +7,7 @@ router.post('/adminRegister',adminController.adminRegister);
 router.post('/adminLogin',adminController.adminLogin);
 
 // router.use(verifyJWT);
-router.get('/getuserDetails',adminController.getuserDetails);
+router.get('/getUsers',adminController.getUsers);
 router.post('/addjobroles',adminController.addjobroles);
 router.get('/getAllJobs',adminController.getAllJobs);
 router.post('/addAJob',adminController.addAJob);
