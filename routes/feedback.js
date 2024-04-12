@@ -4,5 +4,6 @@ const feedbackController = require('../controllers/feedbackController');
 
 router.post('/submitFeedback',feedbackController.submitFeedback);
 router.get('/displayFeedbacks',feedbackController.displayFeedbacks);
+router.post('/changeStatus',feedbackController.changeStatus);
 
 module.exports = router;

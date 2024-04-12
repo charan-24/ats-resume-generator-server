@@ -3,7 +3,7 @@ const exp = require('express');
 const router = exp.Router();
 
 router.post('/generateResume',resumeController.generateResume);
-router.get('/jsonToPdf',resumeController.jsonToPdf);
+router.post('/jsonToPdf',resumeController.jsonToPdf);
 
 module.exports = router;
 
