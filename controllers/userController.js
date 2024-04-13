@@ -17,16 +17,16 @@ const userRegistration = asyncHandler(async (req, res) => {
     const [duplicate1] = await db.query(`select phone_number, email_org from userdetails where phone_number = ? || email_org = ?`,[phone_number,email_org]);
     
     if(duplicate0[0]?.username == username){
-        return res.status(400).json("usernameerror");
+        return res.status(400).json({message:"usernameerror"});
     }
     else if(duplicate0[0]?.email == email){
-        return res.status(400).json("emailerror");
+        return res.status(400).json({message:"emailerror"});
     }
     else if(duplicate1[1]?.phone_number == phone_number){
-        return res.status(400).json("numbererror");
+        return res.status(400).json({message:"numbererror"});
     }
     else if(duplicate1[1]?.email_org == email_org){
-        return res.status(400).json("emailorgerror");
+        return res.status(400).json({message:"emailorgerror"});
     }
     if(password !== cnfpassword){
         return res.status(400).json({message:"passwords doesn't match"})
@@ -55,10 +55,10 @@ const userRegistration = asyncHandler(async (req, res) => {
     const userdetailsobj = {
         "user_id": userid[0].user_id,
         "username": username,
-        "first_name": first_name,
-        "last_name": last_name,
+        "firstname": first_name,
+        "lastname": last_name,
         "email": email,
-        "email_org": email_org,
+        "emailorg": email_org,
         "phone_number": phone_number,
         "linkedinurl":linkedinurl || "",
         "strength": strength || "",
@@ -122,33 +122,34 @@ const userRegistration = asyncHandler(async (req, res) => {
                                 })
         }
     }
-    return res.status(200).json("useradded");
+    return res.status(200).json({message:"useradded",userid:userid[0].user_id});
 });
 
 //select preferred roles
 const selectPreferredRoles = asyncHandler(async(req,res)=>{
-    const {user_id,preferredroles} = req.body;
-    if(!preferredroles){
-        return res.status(401).json({message:"no data"});
-    }
-
+    let {user_id,preferredroles} = req.body;
+    user_id = parseInt(user_id);
+    preferredroles = JSON.parse(preferredroles);
+    console.log(preferredroles);
     let userpreferences = await db.query(`select * from preferredjobroles where user_id = ?`,[user_id])
                                     .catch(err=>{
                                         return res.status(400).json({message:err.sqlMessage});
                                     });
+    
     for(let i=0;i<preferredroles.length;i++){
+        // console.log(preferredroles[i]);
         const preferred = preferredroles[i];
         if(userpreferences[0].length>=1){
-            const found = await userpreferences[0].find(role => role.jobrole_id === preferred.jobrole_id);
+            const found = await userpreferences[0].find(role => role.jobrole_id === parseInt(preferred.jobrole_id));
             if(!found){
-                const addrole = await db.query(`insert into preferredjobroles set ?`,{"user_id":user_id,"jobrole_id":preferred.jobrole_id})
+                const addrole = await db.query(`insert into preferredjobroles set ?`,{"user_id":user_id,"jobrole_id":parseInt(preferred.jobrole_id)})
                                         .catch(err=>{
                                             return res.status(400).json({message:err.sqlMessage});
                                         })
             }
         }
         else{
-            const addrole = await db.query(`insert into preferredjobroles set ?`,{"user_id":user_id,"jobrole_id":preferred.jobrole_id})
+            const addrole = await db.query(`insert into preferredjobroles set ?`,{"user_id":user_id,"jobrole_id":parseInt(preferred.jobrole_id)})
                                         .catch(err=>{
                                             return res.status(400).json({message:err.sqlMessage});
                                         })
@@ -159,9 +160,10 @@ const selectPreferredRoles = asyncHandler(async(req,res)=>{
                                     .catch(err=>{
                                         return res.status(400).json({message:err.sqlMessage});
                                     });
+
     for(let i=0;i<userpreferences[0].length;i++){
         const preferred = userpreferences[0][i];
-        const found = await preferredroles.find(role => role.jobrole_id === preferred.jobrole_id);
+        const found = await preferredroles.find(role => parseInt(role.jobrole_id) === preferred.jobrole_id);
         if(!found){
             const addrole = await db.query(`delete from preferredjobroles where pref_id = ?`,[preferred.pref_id])
                                     .catch(err=>{
@@ -169,9 +171,24 @@ const selectPreferredRoles = asyncHandler(async(req,res)=>{
                                     })
         }
     }
-
+    
     return res.status(200).json({message:"preferrences chnaged"});
 });
+
+const getPreferredRoles = asyncHandler(async(req,res)=>{
+    const {userid} = req.params;
+    console.log(userid);
+    if(!userid){
+        return res.status(400).json({message:"no userid"});
+    }
+    const [preferred] = await db.query(`select jobrole_id from preferredjobroles where user_id = ?`,[userid])
+                                .catch(err=>{
+                                    return res.status(400).json({message:err.sqlMessage});
+                                });
+    let arr = [];
+    preferred.map(item => arr.push(item.jobrole_id));
+    return res.status(200).json(arr);
+})
 
 const editUserProfile = asyncHandler(async(req,res)=>{
     const changesobj = req.body;
@@ -306,16 +323,16 @@ const userLogin = asyncHandler(async(req,res)=>{
 });
 
 const getPreferredJobs = asyncHandler(async(req,res)=>{
-    const {user_id} = req.body;
-    if(!user_id){
-        return res.status(400).json({message:"user_id required"});
+    const {userid} = req.params;
+    if(!userid){
+        return res.status(400).json({message:"userid required"});
     }
     const preferredsql = `select * from jobslisted, preferredjobroles as pr where pr.user_id = ? and pr.jobrole_id = jobslisted.jobrole_id order by jobslisted.posted_date`; 
-    const preferredjobs = await db.query(preferredsql,[user_id])
+    const [preferredjobs] = await db.query(preferredsql,[userid])
                             .catch(err=>{
                                 return res.status(400).json({message:err.sqlMessage});
                             })
-    return res.status(200).json(preferredjobs[0]);
+    return res.status(200).json(preferredjobs);
 });
 
 const addProject = asyncHandler(async(req,res)=>{
@@ -404,7 +421,7 @@ const getUserDetails = asyncHandler(async(req,res)=>{
                                 .catch(err=>{
                                     return res.status(400).json(err.sqlMessage);
                                 });
-    const [resumes] = await db.query('select resumeplan,resumesused from subscriptions where user_id = ?',[userid])
+    const resumes = await db.query('select resumeplan,resumesused from subscriptions where user_id = ?',[userid])
                                 .catch(err=>{
                                     return res.status(400).json(err.sqlMessage);
                                 });
@@ -421,7 +438,21 @@ const getUserDetails = asyncHandler(async(req,res)=>{
                             .catch(err=>{
                                 return res.status(400).json(err.sqlMessage);
                             });
-    
+    const [preferred] = await db.query(`select jobrole_id from preferredjobroles where user_id = ?`,[userid])
+                            .catch(err=>{
+                                return res.status(400).json({message:err.sqlMessage});
+                            });
+    let preferredarr = [];
+    preferred.map(item => preferredarr.push(item.jobrole_id));
+    const [jobroles] = await db.query(`select * from jobroles`)
+                                .catch(err=>{
+                                    return res.status(400).json({message:err.sqlMessage})
+                                });
+    const preferredsql = `select * from jobslisted, preferredjobroles as pr where pr.user_id = ? and pr.jobrole_id = jobslisted.jobrole_id order by jobslisted.posted_date`; 
+    const [preferredjobs] = await db.query(preferredsql,[userid])
+                            .catch(err=>{
+                                return res.status(400).json({message:err.sqlMessage});
+                            })
     
     let overview = {};
     overview["details"] = details[0];
@@ -430,12 +461,16 @@ const getUserDetails = asyncHandler(async(req,res)=>{
     overview["projects"] = projects[0];
     overview["workexp"] = workexp[0];
     overview["certificates"] = certificates[0];
+    overview["preferredroles"] = preferredarr;
+    overview["jobroles"] = jobroles;
+    overview["preferredjobs"] = preferredjobs;
     return res.status(200).json(overview);
 });
 
 module.exports = {
     userRegistration,
     selectPreferredRoles,
+    getPreferredRoles,
     editUserProfile,
     userLogin,
     addWorkExp,

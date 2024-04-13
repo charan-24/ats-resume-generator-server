@@ -18,6 +18,7 @@ require('./database/database');
 app.use('/user',require('./routes/user'));
 app.use('/admin',require('./routes/admin'));
 app.use('/hr',require('./routes/hr'));
+app.use('/tpo',require('./routes/tpo'));
 app.use('/events',require('./routes/events'));
 app.use('/resume',require('./routes/resume'));
 app.use('/filestorage',require('./routes/filestorage'));

@@ -3,6 +3,7 @@ const db = require('../database/database');
 
 const submitFeedback = asyncHandler(async(req,res)=>{
     const {user_id,fullname,email,category,subject,description,urgency,contact_method} = req.body;
+    console.log(req.body);
     const feedbackobj = {
         "user_id":user_id,
         "fullname":fullname,
@@ -31,7 +32,22 @@ const displayFeedbacks = asyncHandler(async(req,res)=>{
     return res.status(200).json(feedbacks[0]);
 });
 
+const changeStatus = asyncHandler(async(req,res)=>{
+    const {feedback_id,status}  = req.body;
+
+    if(!feedback_id || !status){
+        return res.status(400).json("empty data");
+    }
+
+    const changestatus = await db.query(`update feedbacks set ? where feedback_id = ?`,[{status},feedback_id])
+                                    .catch(err=>{
+                                        return res.status(400).json(err.sqlMessage);
+                                    });
+    return res.status(200).json("status changed");
+})
+
 module.exports = {
     submitFeedback,
-    displayFeedbacks
+    displayFeedbacks,
+    changeStatus
 }

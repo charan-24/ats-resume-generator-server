@@ -3,6 +3,91 @@ const db = require('../database/database');
 const jwt = require('jsonwebtoken');
 const asyncHandler = require('express-async-handler');
 
+//get admin overview details
+const getAdminOverview = asyncHandler(async(req,res)=>{
+
+    const adminoverview = {};
+
+    const [users] = await db.query(`select * from useraccounts inner join userdetails on userdetails.user_id = useraccounts.user_id`)
+                            .catch(err=>{
+                                return res.status(400).json(err.sqlMessage);
+                            });
+    adminoverview["users"] = users;  
+
+    const [admins] = await db.query(`select * from adminaccounts`)
+                             .catch(err=>{
+                                return res.status(400).json(err.sqlMessage);
+                             });
+    adminoverview["admins"] = admins;        
+
+    const [hrs] = await db.query(`select * from hraccounts`)
+                             .catch(err=>{
+                                return res.status(400).json(err.sqlMessage);
+                             });
+    adminoverview["hrs"] = hrs;
+
+    const [tpos] = await db.query(`select * from tpoaccounts`)
+                             .catch(err=>{
+                                return res.status(400).json(err.sqlMessage);
+                             });
+    adminoverview["tpos"] = tpos;
+
+    const [jobslisted] = await db.query(`select * from jobslisted`)
+                                    .catch(err=>{
+                                        return res.status(400).json(err.sqlMessage)
+                                    });
+    adminoverview["jobslisted"] = jobslisted;
+
+    const [feedbacks] = await db.query(`select * from feedbacks order by issue_date desc`)
+                                    .catch(err=>{
+                                        return res.status(400).json(err.sqlMessage)
+                                    });
+    adminoverview["feedbacks"] = feedbacks;
+
+    const [hackathons] = await db.query(`select * from hackathons`)
+                                    .catch(err=>{
+                                        return res.status(400).json(err.sqlMessage)
+                                    }); 
+    adminoverview["hackathons"] = hackathons;
+
+    const [contests] = await db.query(`select * from codingcontests`)
+                                    .catch(err=>{
+                                        return res.status(400).json(err.sqlMessage)
+                                    }); 
+    adminoverview["contests"] = contests;
+
+    const [meetups] = await db.query(`select * from codingmeetups`)
+                                .catch(err=>{
+                                    return res.status(400).json(err.sqlMessage)
+                                });
+    adminoverview["meetups"] = meetups;       
+
+    const [hackathonwinners] = await db.query(`select * from hackathonwinners`)
+                                .catch(err=>{
+                                    return res.status(400).json(err.sqlMessage)
+                                }); 
+    adminoverview["hackathonwinners"] = hackathonwinners;  
+                     
+    const [contestwinners] = await db.query(`select * from contestwinners`)
+                                .catch(err=>{
+                                    return res.status(400).json(err.sqlMessage)
+                                });
+    adminoverview["contestwinners"] = contestwinners;
+
+    const [meetupwinners] = await db.query(`select * from meetupwinners`)
+                                .catch(err=>{
+                                    return res.status(400).json(err.sqlMessage)
+                                });  
+    adminoverview["meetupwinners"] = meetupwinners;
+
+    const [resumereqs] = await db.query(`select count(*) as resumereqs from userresumes`)
+                                    .catch(err=>{
+                                        return res.status(400).json(err.sqlMessage);
+                                    });
+    adminoverview["resumereqs"] = resumereqs[0];
+
+    return res.status(200).json(adminoverview);
+});
 
 //getting userdetails from database
 const getUsers = asyncHandler(async (req, res) => {
@@ -41,9 +126,9 @@ const getAllJobs = asyncHandler(async(req,res)=>{
 });
 
 const addAJob = asyncHandler(async(req,res)=>{
-    const {jobrole_id, jobtitle, location, company, type, experience, description} = req.body;
+    const {jobrole_id, jobtitle, location, company, jobtype, experience, description} = req.body;
 
-    if(!jobrole_id || !jobtitle || !location || !company || !type || !experience || !description){
+    if(!jobrole_id || !jobtitle || !location || !company || !jobtype || !experience || !description){
         return res.status(401).json({message:"all fields required"});
     }
     const jobobj = {
@@ -52,7 +137,7 @@ const addAJob = asyncHandler(async(req,res)=>{
         "company":company,
         "description":description,
         "location":location,
-        "job_type":type,
+        "job_type":jobtype,
         "experience":experience,
     };
 
@@ -166,6 +251,7 @@ const deleteUser = asyncHandler(async(req,res)=>{
 
 const addHackathon = asyncHandler(async(req,res)=>{
     const hackathon = req.body;
+    // console.log(hackathon);
     if(!hackathon || !Object.keys(hackathon).length){
         return res.status(401).json({message:"empty hackathon data"});
     }
@@ -207,7 +293,6 @@ const addMeetup = asyncHandler(async(req,res)=>{
 
 const addHackathonWinner = asyncHandler(async(req,res)=>{
     const winner = req.body;
-    
     const addwinner = await db.query(`insert into hackathonwinners set ?`,winner)
                                 .catch(err=>{
                                     return res.status(401).json({message:err.sqlMessage});
@@ -236,8 +321,8 @@ const addMeetupWinner = asyncHandler(async(req,res)=>{
 });
 
 const adminRegister = asyncHandler (async(req,res)=>{
-    const {username, password,email} = req.body;
-    if(!username || !password || !email){
+    const {username, password, firstname, lastname, email} = req.body;
+    if(!username || !password || !email || !firstname || !lastname){
         return res.status(401).json({message:"all fields required"});
     }
     const [duplicate] = await db.query(`select * from adminaccounts where username = ? || email = ?`,[username,email]);
@@ -250,6 +335,8 @@ const adminRegister = asyncHandler (async(req,res)=>{
     const adminobj = { 
         "username":username,
         "password":hashpassword,
+        "firstname": firstname,
+        "lastname": lastname,
         "email":email
     };
     const sqllogin = `insert into adminaccounts set ?`;
@@ -268,34 +355,35 @@ const adminLogin = asyncHandler(async(req,res)=>{
     if(!password){
         return res.status(400).json({message:"password required"})        
     }
-    const [foundUser] = await db.query(`select admin_id, password, username, role from adminaccounts where username = ? || email = ?`,[username,username]);
-    // console.log(hashpassword[0]);
-    if(!foundUser[0] || !foundUser[0].length){
+    const [foundAdmin] = await db.query(`select admin_id, password, username, role from adminaccounts where username = ? || email = ?`,[username,username]);
+    console.log(foundAdmin[0]);
+    if(!foundAdmin[0]){
         return res.status(401).json({message:"admin not found"});
     }
-    const match = await bcrypt.compare(password,foundUser[0].password);
+    const match = await bcrypt.compare(password,foundAdmin[0].password);
     if(match){
         const [logindate] = await db.query(`select curdate() as logindate`);
         const accessToken = jwt.sign(
-            {"username": foundUser[0].username},
+            {"username": foundAdmin[0].username},
             process.env.SECRET_ACCESS_TOKEN,
             {expiresIn: '1d'}
         );
         const refreshToken =  jwt.sign(
-            {"username": foundUser[0].username},
+            {"username": foundAdmin[0].username},
             process.env.SECRET_REFRESH_TOKEN,
             {expiresIn: '2d'}
         );
-        const addrefreshtoken = await db.query(`update adminaccounts set ? where admin_id = ?`,[{last_login:logindate[0].logindate,"refreshToken":refreshToken},foundUser[0].admin_id]);
+        const addrefreshtoken = await db.query(`update adminaccounts set ? where admin_id = ?`,[{last_login:logindate[0].logindate,"refreshToken":refreshToken},foundAdmin[0].admin_id]);
         res.cookie('jwt', refreshToken, { httpOnly: true, maxAge: 2 * 24 * 60 * 60 * 1000});
-        return res.status(200).json({accessToken});    
+        return res.status(200).json({message:"success",accessToken,"userid":foundAdmin[0].admin_id,"role":foundAdmin[0].role});    
     }
-    return res.status(400).json({message:"unauthorized"});
+    return res.status(400).json({message:"wrongpwd"});
 });
 
 
 
 module.exports = {
+    getAdminOverview,
     getUsers,
     addjobroles,
     getAllJobs,
