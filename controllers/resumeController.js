@@ -2,9 +2,17 @@ require('dotenv').config();
 const asyncHandler = require('express-async-handler');
 const OpenAI = require('openai');
 const db = require('../database/database');
-const {jsPDF} = require('jspdf');
-const { default: axios } = require('axios');
 const PDFDocument = require("pdfkit");
+const {S3Client, PutObjectCommand, GetObjectCommand} = require('@aws-sdk/client-s3');
+const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
+const { Upload } = require('@aws-sdk/lib-storage');
+const crypto = require('crypto');
+const axios = require("axios");
+
+const accessKeyId = process.env.AWS_ACCESS_KEYID;  
+const secretKey = process.env.AWS_SECRET_KEY;  
+const regionName = process.env.S3_REGION;  
+const bucketName = process.env.S3_BUCKET;
 
 
 const openai = new OpenAI({
@@ -16,7 +24,7 @@ const generateResume = asyncHandler(async (req, res) => {
     resumereq.projects = JSON.parse(resumereq.projects);
     resumereq.certificates = JSON.parse(resumereq.certificates);
     console.log(resumereq);
-
+    const resumename = resumereq.resumename;
     if (!resumereq || !Object.keys(resumereq).length) {
         return res.status(401).json({ message: "empty data received" });
     }
@@ -120,7 +128,7 @@ const generateResume = asyncHandler(async (req, res) => {
         projects[i].description = result?.choices[0]?.message?.content;
     }
     console.log(projects);
-    const resp = await axios.post('http://localhost:5000/resume/jsonToPdf/',{"userid":resumereq.user_id,userdetails,workexp,projects,education,skills,certificates,hobbies},{
+    const resp = await axios.post('http://localhost:5000/resume/jsonToPdf/',{"userid":resumereq.user_id,resumename,userdetails,workexp,projects,education,skills,certificates,hobbies},{
                     headers: {
                     'Content-Type': 'application/json'
                     }
@@ -136,13 +144,12 @@ const generateResume = asyncHandler(async (req, res) => {
 
 const jsonToPdf = asyncHandler(async(req,res)=>{
     const jsondata = req.body;
+    const user_id = jsondata.userid;
     console.log(jsondata);
     const resumeContent = {
-        Name: jsondata?.userdetails?.["firstname"] + jsondata?.userdetails["lastname"],
-        Email: jsondata?.userdetails["email"],
-        Linkedin: jsondata?.userdetails.linkedinurl || "",
-        Mobile: jsondata?.userdetails.phone_number,
-        Github: "https://github.com/varshareddy03",
+        Name: jsondata?.userdetails[0].firstname +" "+ jsondata?.userdetails[0].lastname,
+        Email: jsondata?.userdetails[0].email,
+        Mobile: jsondata?.userdetails[0].phone_number,
         "Skills Summary": jsondata.skills,
         Education: [],
         Experience: [],
@@ -156,20 +163,25 @@ const jsonToPdf = asyncHandler(async(req,res)=>{
           "Achieved third place in the Wiki Women Hackathon hosted at IIIT Hyderabad, showcasing strong collaborative skills, tech",
         ],
       };
-
+      if(jsondata?.userdetails[0]?.linkedinurl){
+        resumeContent["Linkedin"] = jsondata?.userdetails[0].linkedinurl
+      }
+      if(jsondata?.userdetails[0]?.github){
+        resumeContent["Github"] = jsondata?.userdetails[0].github
+      }
       jsondata.education.map(edu => {
             resumeContent?.Education?.push({
                 name: edu.college_name,
                 Branch: edu.specialization,
-                Year: edu.year_of_grad,
-                "CGPA/%": edu.cgpa_or_percentage
+                Year: edu.year_of_grad.substr(0,4),
+                CGPA: edu.cgpa_or_percentage
             });
         });
 
         jsondata.workexp.map(work => {
                 resumeContent?.Experience?.push({
                     name: work.company_name,
-                    Duration: work.start_date + '-' + work.end_date,
+                    Duration: work.start_date.substr(0,10) + ' - ' + work.end_date.substr(0,10),
                     Role: work.job_title,
                     Description: work.job_description
                 });
@@ -177,7 +189,7 @@ const jsonToPdf = asyncHandler(async(req,res)=>{
         jsondata.projects.map(project => {
             resumeContent?.Projects?.push({
                 name: project.title,
-                Description: project.description
+                description: project.description
             });
     });
       const doc = new PDFDocument({
@@ -267,8 +279,12 @@ const jsonToPdf = asyncHandler(async(req,res)=>{
       
       // Add Contact Information
       generateInfo("Email", resumeContent.Email);
-      generateInfo("Linkedin", resumeContent.Linkedin);
-      generateInfo("Github", resumeContent.Github);
+      if(resumeContent.Linkedin){
+        generateInfo("Linkedin", resumeContent.Linkedin);
+      }
+      if(resumeContent.Github){
+        generateInfo("Github", resumeContent.Github);
+      }
       generateInfo("Mobile", resumeContent.Mobile);
       
       // Add Skills Summary Section
@@ -355,15 +371,96 @@ const jsonToPdf = asyncHandler(async(req,res)=>{
           "*I hereby declare that the information given is true to the best of my knowledge"
         )
         .moveDown(0.5);
+
+        const buffer = [];
+        doc.on('data', function(chunk) {
+            buffer.push(chunk);
+        });
+        doc.on('end', async function() {
+            const pdfBuffer = Buffer.concat(buffer);
+            // Now you have the PDF buffer, you can do further processing, save it to a file, or send it over the network.
+            // For example, you can save it to a file like this:
+            
+              const s3 = new S3Client({
+                region: regionName,
+                credentials:{
+                    accessKeyId: accessKeyId,
+                    secretAccessKey: secretKey
+                }
+            });
+
+            const fileName = (bytes = 32) => crypto.randomBytes(bytes).toString('hex')
+            const filePath = `userResumes/${fileName()}`;
+
+            const params = {
+                Bucket: bucketName,
+                Key: filePath,
+                Body: pdfBuffer,
+                ContentType: "application/pdf"
+            }
+            console.log(pdfBuffer);
+            
+            try {
+                const parallelUploads3 = new Upload({
+                  client: s3,
+                  queueSize: 4, // optional concurrency configuration
+                  leavePartsOnError: false, // optional manually handle dropped parts
+                  params: params,
+                });
+            
+                parallelUploads3.on("httpUploadProgress", (progress) => {
+                  console.log(progress);
+                });
+            
+                await parallelUploads3.done();
+            } 
+            catch (e) {
+                console.log(e);
+            }
+
+            // await s3.send(new PutObjectCommand(params));
+            await db.query(`insert into userresumes set ?`,{"user_id":user_id,"resumename":resumename,"resumeawspath":filePath})
+                    .catch(err=>{
+                        return res.status(400).json({message:err.sqlMessage});
+                    });
+            console.log('PDF saved successfully.');
+        });
       
       doc.end();
       console.log("PDF generated successfully!");
-      
+      return res.status(200).json({message:"PDF generated successfully!"})
 });
 
+const getResume = asyncHandler(async(req,res)=>{
+  const {resume_id} = req.params;
+  if(!resume_id){
+  return res.status(400).json("empty data");
+  }
+
+  const [resumepath] = await db.query(`select resumeawspath from userresumes where resume_id = ?`,[resume_id])
+                              .catch(err=>{
+                                  return res.status(400).json({message:err.sqlMessage});
+                              })
+  // console.log(resumepath[0].resumeawspath);
+  const s3 = new S3Client({
+      region: regionName,
+      credentials:{
+          accessKeyId: accessKeyId,
+          secretAccessKey: secretKey
+      }
+  });
+  const params = {
+      Bucket: bucketName,
+      Key: resumepath[0].resumeawspath,
+  }
+  const command = new GetObjectCommand(params);
+  const url = await getSignedUrl(s3, command, { expiresIn: 3600 });
+  return res.send(url);
+});
 
  
 module.exports = {
     generateResume,
     jsonToPdf,
+    getResume
 }
