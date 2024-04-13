@@ -21,7 +21,6 @@ app.use('/hr',require('./routes/hr'));
 app.use('/tpo',require('./routes/tpo'));
 app.use('/events',require('./routes/events'));
 app.use('/resume',require('./routes/resume'));
-app.use('/filestorage',require('./routes/filestorage'));
 app.use('/feedback',require('./routes/feedback'));
 app.use('/payment',require('./routes/payment'));
 app.use('/portal',require('./routes/portal'));
