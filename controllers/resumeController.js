@@ -432,12 +432,13 @@ const jsonToPdf = asyncHandler(async(req,res)=>{
 });
 
 const getResume = asyncHandler(async(req,res)=>{
-  const {resume_id} = req.params;
-  if(!resume_id){
+  const {resumeid} = req.params;
+  console.log(resumeid);
+  if(!resumeid){
   return res.status(400).json("empty data");
   }
 
-  const [resumepath] = await db.query(`select resumeawspath from userresumes where resume_id = ?`,[resume_id])
+  const [resumepath] = await db.query(`select resumeawspath from userresumes where resume_id = ?`,[resumeid])
                               .catch(err=>{
                                   return res.status(400).json({message:err.sqlMessage});
                               })

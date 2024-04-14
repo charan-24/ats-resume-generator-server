@@ -107,7 +107,7 @@ const addjobroles = asyncHandler(async(req,res)=>{
     }
     const [duplicate] = await db.query(`select * from jobroles where jobrole_name = ?`,[jobrole_name]);
     if(duplicate[0]){
-        return res.status(400).json({message:"job role dupliacte found"});
+        return res.status(400).json({message:"job role duplicate found"});
     }
     const addrole = await db.query(`insert into jobroles set ?`,{"jobrole_name":jobrole_name})
                             .catch(err=>{
@@ -151,33 +151,34 @@ const addAJob = asyncHandler(async(req,res)=>{
 });
 
 const addBulkJobs = asyncHandler(async(req,res)=>{
-    const {bulkjobs} = req.body;
-    if(!bulkjobs || bulkjobs.length===0){
-        return res.status(401).json({message:"jobs provided are empty"});
-    }
+    const bulkjobs = req.body;
+    console.log(bulkjobs);
+    // if(!bulkjobs || bulkjobs.length===0){
+    //     return res.status(401).json({message:"jobs provided are empty"});
+    // }
 
-    for(let i=0;i<bulkjobs.length;i++){
-        const job = bulkjobs[i];
-        const jobobj = {
-            "jobrole_id":job.jobrole_id,
-            "title":job.title,
-            "company":job.company,
-            "description":job.description,
-            "location":job.location,
-            "job_type":job.type,
-            "experience":job.experience,
-        };
-        if(job.salary){
-            jobobj["salary"]=job.salary;
-        }
-        const jobaddsql = `insert into jobslisted set ?`;
-        const jobadded = await db.query(jobaddsql,jobobj)
-                                    .catch(err=>{
-                                        console.log(err);
-                                        return res.status(400).json({message:err.sqlMessage});
-                                    });
-    }
-    return res.status(200).json({message:bulkjobs.length + ` new job are added`});
+    // for(let i=0;i<bulkjobs.length;i++){
+    //     const job = bulkjobs[i];
+    //     const jobobj = {
+    //         "jobrole_id":job.jobrole_id,
+    //         "title":job.title,
+    //         "company":job.company,
+    //         "description":job.description,
+    //         "location":job.location,
+    //         "job_type":job.type,
+    //         "experience":job.experience,
+    //     };
+    //     if(job.salary){
+    //         jobobj["salary"]=job.salary;
+    //     }
+    //     const jobaddsql = `insert into jobslisted set ?`;
+    //     const jobadded = await db.query(jobaddsql,jobobj)
+    //                                 .catch(err=>{
+    //                                     console.log(err);
+    //                                     return res.status(400).json({message:err.sqlMessage});
+    //                                 });
+    // }
+    return res.status(200).json({message:bulkjobs.length + ` new jobs are added`});
 });
 
 const editJob = asyncHandler(async(req,res)=>{

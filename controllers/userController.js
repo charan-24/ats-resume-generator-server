@@ -467,6 +467,16 @@ const getUserDetails = asyncHandler(async(req,res)=>{
     return res.status(200).json(overview);
 });
 
+const getAllJobRoles = asyncHandler(async(req,res)=>{
+    console.log("getAllJobRoles");
+    const [jobroles] = await db.query(`select * from jobroles`)
+                                .catch(err=>{
+                                    return res.status(400).json({message:err.sqlMessage})
+                                });
+    console.log(jobroles)
+    return res.status(200).json(jobroles);
+})
+
 module.exports = {
     userRegistration,
     selectPreferredRoles,
@@ -481,5 +491,6 @@ module.exports = {
     addCertificate,
     getUserResumes,
     getUserCertificates,
-    getUserDetails
+    getUserDetails,
+    getAllJobRoles
 }
