@@ -20,5 +20,6 @@ router.post('/addCertificate',userController.addCertificate);
 router.get('/getUserResumes/:userid',userController.getUserResumes);
 router.get('/getUserCertificates/:userid',userController.getUserCertificates);
 router.get('/getUserDetails/:userid',userController.getUserDetails);
+router.get('/getAllJobRoles',userController.getAllJobRoles);
 
 module.exports = router;
