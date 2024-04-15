@@ -419,7 +419,7 @@ const jsonToPdf = asyncHandler(async(req,res)=>{
             }
 
             // await s3.send(new PutObjectCommand(params));
-            await db.query(`insert into userresumes set ?`,{"user_id":user_id,"resumename":resumename,"resumeawspath":filePath})
+            await db.query(`insert into userresumes set ?`,{"user_id":user_id,"resumename":jsondata?.resumename,"resumeawspath":filePath})
                     .catch(err=>{
                         return res.status(400).json({message:err.sqlMessage});
                     });
