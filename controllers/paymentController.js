@@ -6,7 +6,8 @@ const Razorpay = require('razorpay');
 
 const createOrder = asyncHandler(async(req,res)=>{
     const {username,amount} = req.body;
-    const [user] = await db.query(`select user_id, first_name,last_name,email, phone_number from userdetails where username = ?`,[username])
+    console.log(req.body);
+    const [user] = await db.query(`select user_id,firstname,lastname,email, phone_number from userdetails where username = ?`,[username])
                             .catch(err=>{
                                 return res.status(400).json(err.sqlMessage);
                             });
@@ -20,7 +21,7 @@ const createOrder = asyncHandler(async(req,res)=>{
     notes:{
         "key":process.env.RAZORPAY_KEY,
         "userid":user[0].user_id,
-        "fullname": user[0].first_name +" "+ user[0].last_name,
+        "fullname": user[0].firstname +" "+ user[0].lastname,
         "email": user[0].email,
         "mobile": user[0].phone_number
     }
@@ -72,7 +73,7 @@ const validatePayment = asyncHandler(async(req,res)=>{
                           .catch(err=>{
                             return res.status(400).json({message: err.sqlMessage});
                           });
-    const paid = await db.query('update useraccounts set ? where user_id = ?',[{subscribed:true},user_id]);
+    const paid = await db.query('update useraccounts set ? where user_id = ?',[{subscribed:true,resumesplan:10},user_id]);
 
     return res.status(200).json({message:"success"});   
 });
