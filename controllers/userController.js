@@ -413,7 +413,7 @@ const getUserDetails = asyncHandler(async(req,res)=>{
         return res.status(400).json("no userid");
     }
 
-    const [details] = await db.query('select ud.*,ua.resumesreq,ua.resumesplan,ua.subscribed from userdetails ud join useraccounts ua on ud.user_id = ua.user_id where ud.user_id = ? and ua.user_id',[userid,userid])
+    const [details] = await db.query('select ud.*,ua.resumesreq,ua.resumesplan,ua.subscribed from userdetails ud join useraccounts ua on ud.user_id = ua.user_id where ud.user_id = ? and ua.user_id = ?',[userid,userid])
                             .catch(err=>{
                                 return res.status(400).json(err.sqlMessage);
                             })

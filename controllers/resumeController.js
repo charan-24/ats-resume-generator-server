@@ -436,7 +436,7 @@ const getResume = asyncHandler(async(req,res)=>{
   console.log(resumeid);
   if(!resumeid){
   return res.status(400).json("empty data");
-  }
+}
 
   const [resumepath] = await db.query(`select resumeawspath from userresumes where resume_id = ?`,[resumeid])
                               .catch(err=>{
