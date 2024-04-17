@@ -15,7 +15,7 @@ const createOrder = asyncHandler(async(req,res)=>{
     var instance = new Razorpay({ key_id: process.env.RAZORPAY_KEY, key_secret: process.env.RAZORPAY_SECRET })
 
     instance.orders.create({
-    amount: amount,
+    amount: amount*100,
     currency: "INR",
     receipt: `receipt#`+user_id,
     notes:{
@@ -78,7 +78,37 @@ const validatePayment = asyncHandler(async(req,res)=>{
     return res.status(200).json({message:"success"});   
 });
 
+const createCoupon = asyncHandler(async(req,res)=>{
+    const coupon = req.body;
+    if(!coupon || Object.keys(coupon).length==0){
+        return res.status(400).json({message:"empty coupon"});
+    }
+    const [duplicate] = await db.query(`select couponcode from coupons where couponcode = ?`,[coupon.couponcode])
+                                .catch(err=>{
+                                    return res.status(400).json({message:err.sqlMessage});
+                                });
+    console.log(duplicate[0]);
+    if(duplicate[0]){
+        return res.status(400).json({message:"duplicate coupon code entered"});
+    }
+    const addcouponn = await db.query(`insert into coupons set ?`,[coupon])
+                                .catch(err=>{
+                                    return res.status(400).json({message:err.sqlMessage});
+                                });
+    return res.status(200).json({message:"coupon created"});
+});
+
+const getCoupons = asyncHandler(async(req,res)=>{
+    const [getCoupons] = await db.query(`select * from coupons`)
+                                .catch(err=>{
+                                    return res.status(400).json({message:err.sqlMessage})
+                                });
+    return res.status(200).json(getCoupons);
+})
+
 module.exports = {
     createOrder,
     validatePayment,
+    createCoupon,
+    getCoupons
 }
