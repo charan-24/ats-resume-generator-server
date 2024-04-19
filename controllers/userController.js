@@ -2,6 +2,7 @@ const bcrypt = require('bcrypt');
 const asyncHandler = require('express-async-handler');
 const db = require('../database/database');
 const jwt = require('jsonwebtoken');
+const { default: axios } = require('axios');
 const saltRounds = process.env.SALT_ROUNDS; 
 
 
@@ -420,7 +421,7 @@ const getUserDetails = asyncHandler(async(req,res)=>{
     const [education] = await db.query('select * from educationaldetails where user_id = ?',[userid])
                                 .catch(err=>{
                                     return res.status(400).json(err.sqlMessage);
-                                });
+                                });                       
     const resumes = await db.query('select resumeplan,resumesused from subscriptions where user_id = ?',[userid])
                                 .catch(err=>{
                                     return res.status(400).json(err.sqlMessage);
@@ -464,6 +465,15 @@ const getUserDetails = asyncHandler(async(req,res)=>{
     overview["preferredroles"] = preferredarr;
     overview["jobroles"] = jobroles;
     overview["preferredjobs"] = preferredjobs;
+    let userpfp=null;
+    await axios.get(`http://localhost:5000/pfp/getpfp/${userid}`)
+                                .then(res=>{
+                                    userpfp = res.data;
+                                })
+                                .catch(err=>{
+                                    console.log(err);
+                                });
+    overview["userpfp"] = userpfp;
     return res.status(200).json(overview);
 });
 

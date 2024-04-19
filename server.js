@@ -24,6 +24,7 @@ app.use('/resume',require('./routes/resume'));
 app.use('/feedback',require('./routes/feedback'));
 app.use('/payment',require('./routes/payment'));
 app.use('/portal',require('./routes/portal'));
+app.use('/pfp',require('./routes/pfp'));
 app.use('/logout',require('./routes/logout'));
 
 app.listen(process.env.HOST || 5000,()=>{
