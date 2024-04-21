@@ -21,5 +21,7 @@ router.get('/getUserResumes/:userid',userController.getUserResumes);
 router.get('/getUserCertificates/:userid',userController.getUserCertificates);
 router.get('/getUserDetails/:userid',userController.getUserDetails);
 router.get('/getAllJobRoles',userController.getAllJobRoles);
+router.post('/resetPassword',userController.resetPassword);
+router.post('/verifymail',userController.verifymail);
 
 module.exports = router;

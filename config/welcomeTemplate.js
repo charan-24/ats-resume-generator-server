@@ -1,8 +1,9 @@
 const { SESClient, CreateTemplateCommand } = require("@aws-sdk/client-ses"); // CommonJS import
 require('dotenv').config();
+console.log(process.env.S3_REGION);
 const accessKeyId = process.env.AWS_ACCESS_KEYID;  
 const secretKey = process.env.AWS_SECRET_KEY;  
-const regionName = process.env.S3_REGION;
+let regionName = process.env.S3_REGION;
 
 const client = new SESClient({
     region: regionName,

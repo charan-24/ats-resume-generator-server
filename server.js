@@ -1,4 +1,3 @@
-// require('dotenv').config(); //env config
 require('dotenv').config();
 const exp = require('express');
 const cookieParser = require('cookie-parser');
@@ -13,6 +12,8 @@ app.use(exp.urlencoded({extended: false}));
 
 //database connection
 require('./database/database');
+
+// require('./config/resetPasswordTemplate');
 
 //routes
 app.use('/user',require('./routes/user'));

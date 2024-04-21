@@ -4,7 +4,7 @@ const db = require('../database/database');
 const jwt = require('jsonwebtoken');
 const { default: axios } = require('axios');
 const saltRounds = process.env.SALT_ROUNDS; 
-
+console.log(saltRounds);
 
 // registration of user
 const userRegistration = asyncHandler(async (req, res) => {
@@ -487,6 +487,58 @@ const getAllJobRoles = asyncHandler(async(req,res)=>{
     return res.status(200).json(jobroles);
 })
 
+const resetPassword = asyncHandler(async(req,res)=>{
+    const reset = req.body;
+    if(!reset || Object.keys(reset).length<3){
+        return res.status(400).json({message:"all fields required"});
+    }
+
+    const [user] = await db.query(`select * from useraccounts where user_id = ?`,[reset.userid])
+                            .catch(err=>{
+                                return res.status(400).json({message:err.sqlMessage});
+                            });
+    // console.log(user[0]);
+    if(!user[0]){
+        return res.status(400).json({message:"no user found"});
+    }
+    const match = await bcrypt.compare(reset.token, user[0].resetToken)
+    if(match){
+        const hashpwd = await bcrypt.hash(reset.password,parseInt(saltRounds));
+        const resetpwd = await db.query(`update useraccounts set ? where user_id = ?`,[{password:hashpwd},reset.userid])
+                                    .catch(err=>{
+                                        return res.status(400).json({message:err.sqlMessage});
+                                    });
+    }
+    else{
+        return res.status(401).json({message:"unauthorized password reset, try again"})
+    }
+    return res.status(200).json({message:"password resetted"});
+
+});
+
+const verifymail = asyncHandler(async(req,res)=>{
+    const {email} = req.body;
+    if(!email){
+        return res.status(400).json({error:"no email or userid"});
+    }
+
+    const [found] = await db.query(`select user_id,email from useraccounts where email = ?`,[email])
+                            .catch(err=>{
+                                return res.status(400).json({error:err.sqlMessage});
+                            });
+    if(!found[0]){
+        return res.status(400).json({error:"email not found"});
+    }
+    await axios.post('http://localhost:5000/portal/sendResetPasswordMail',{"userid":found[0].user_id,email})
+                .then(res=>{
+                    console.log(res.data);
+                })
+                .catch(err=>{
+                    console.log(err);
+                });
+    return res.status(200).json({message:"success"});
+});
+
 module.exports = {
     userRegistration,
     selectPreferredRoles,
@@ -502,5 +554,7 @@ module.exports = {
     getUserResumes,
     getUserCertificates,
     getUserDetails,
-    getAllJobRoles
+    getAllJobRoles,
+    resetPassword,
+    verifymail
 }
