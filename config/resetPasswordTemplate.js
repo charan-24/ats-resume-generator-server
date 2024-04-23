@@ -20,7 +20,7 @@ const updateTemplate = async () => {
   const template = {
     Template: {
       TemplateName: "ResetPasswordTemplate", // required
-      SubjectPart: "Your ATS-Friendly Resume is Ready!",
+      SubjectPart: "Reset Link",
       HtmlPart: `<html>
       <head>
       

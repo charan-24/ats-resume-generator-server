@@ -4,7 +4,6 @@ const db = require('../database/database');
 const jwt = require('jsonwebtoken');
 const { default: axios } = require('axios');
 const saltRounds = process.env.SALT_ROUNDS; 
-console.log(saltRounds);
 
 // registration of user
 const userRegistration = asyncHandler(async (req, res) => {
@@ -131,7 +130,7 @@ const selectPreferredRoles = asyncHandler(async(req,res)=>{
     let {user_id,preferredroles} = req.body;
     user_id = parseInt(user_id);
     preferredroles = JSON.parse(preferredroles);
-    console.log(preferredroles);
+    // console.log(preferredroles);
     let userpreferences = await db.query(`select * from preferredjobroles where user_id = ?`,[user_id])
                                     .catch(err=>{
                                         return res.status(400).json({message:err.sqlMessage});
@@ -178,7 +177,7 @@ const selectPreferredRoles = asyncHandler(async(req,res)=>{
 
 const getPreferredRoles = asyncHandler(async(req,res)=>{
     const {userid} = req.params;
-    console.log(userid);
+    // console.log(userid);
     if(!userid){
         return res.status(400).json({message:"no userid"});
     }
@@ -193,7 +192,7 @@ const getPreferredRoles = asyncHandler(async(req,res)=>{
 
 const editUserProfile = asyncHandler(async(req,res)=>{
     const changesobj = req.body;
-    console.log(req.body);
+    // console.log(req.body);
     const user_id = changesobj.user_id;
     if(!changesobj || !user_id){
             return res.status(401).json({message:"no data provided"});
@@ -414,7 +413,7 @@ const getUserDetails = asyncHandler(async(req,res)=>{
         return res.status(400).json("no userid");
     }
 
-    const [details] = await db.query('select ud.*,ua.resumesreq,ua.resumesplan,ua.subscribed from userdetails ud join useraccounts ua on ud.user_id = ua.user_id where ud.user_id = ? and ua.user_id = ?',[userid,userid])
+    const [details] = await db.query('select ud.*,ua.resumesused,ua.resumesplan,ua.subscribed from userdetails ud join useraccounts ua on ud.user_id = ua.user_id where ud.user_id = ? and ua.user_id = ?',[userid,userid])
                             .catch(err=>{
                                 return res.status(400).json(err.sqlMessage);
                             })
@@ -422,10 +421,10 @@ const getUserDetails = asyncHandler(async(req,res)=>{
                                 .catch(err=>{
                                     return res.status(400).json(err.sqlMessage);
                                 });                       
-    const resumes = await db.query('select resumeplan,resumesused from subscriptions where user_id = ?',[userid])
-                                .catch(err=>{
-                                    return res.status(400).json(err.sqlMessage);
-                                });
+    // const resumes = await db.query('select resumesplan,resumesused from useraccounts where user_id = ?',[userid])
+    //                             .catch(err=>{
+    //                                 return res.status(400).json(err.sqlMessage);
+    //                             });
 
     const projects = await db.query('select * from userprojects where user_id = ?',[userid])
                                 .catch(err=>{
@@ -457,7 +456,7 @@ const getUserDetails = asyncHandler(async(req,res)=>{
     
     let overview = {};
     overview["details"] = details[0];
-    overview["resumes"] = resumes[0];
+    // overview["resumes"] = resumes[0];
     overview["education"] = education[0];
     overview["projects"] = projects[0];
     overview["workexp"] = workexp[0];
@@ -483,7 +482,7 @@ const getAllJobRoles = asyncHandler(async(req,res)=>{
                                 .catch(err=>{
                                     return res.status(400).json({message:err.sqlMessage})
                                 });
-    console.log(jobroles)
+    // console.log(jobroles)
     return res.status(200).json(jobroles);
 })
 
@@ -497,20 +496,55 @@ const resetPassword = asyncHandler(async(req,res)=>{
                             .catch(err=>{
                                 return res.status(400).json({message:err.sqlMessage});
                             });
-    // console.log(user[0]);
-    if(!user[0]){
+    const [hr] = await db.query(`select * from hraccounts where hr_id = ?`,[reset.userid])
+                            .catch(err=>{
+                                return res.status(400).json({message:err.sqlMessage});
+                            });
+    const [tpo] = await db.query(`select * from tpoaccounts where tpo_id = ?`,[reset.userid])
+                            .catch(err=>{
+                                return res.status(400).json({message:err.sqlMessage});
+                            });
+    if(!user[0] && !hr[0] && !tpo[0]){
         return res.status(400).json({message:"no user found"});
     }
-    const match = await bcrypt.compare(reset.token, user[0].resetToken)
-    if(match){
-        const hashpwd = await bcrypt.hash(reset.password,parseInt(saltRounds));
-        const resetpwd = await db.query(`update useraccounts set ? where user_id = ?`,[{password:hashpwd},reset.userid])
-                                    .catch(err=>{
-                                        return res.status(400).json({message:err.sqlMessage});
-                                    });
+    else if(user[0]){
+        const match = await bcrypt.compare(reset.token, user[0].resetToken);
+        if(match){
+            const hashpwd = await bcrypt.hash(reset.password,parseInt(saltRounds));
+            const resetpwd = await db.query(`update useraccounts set ? where user_id = ?`,[{password:hashpwd},reset.userid])
+                                        .catch(err=>{
+                                            return res.status(400).json({message:err.sqlMessage});
+                                        });
+        }
+        else{
+            return res.status(401).json({message:"unauthorized password reset, try again"})
+        }
     }
-    else{
-        return res.status(401).json({message:"unauthorized password reset, try again"})
+    else if(hr[0]){
+        const match = await bcrypt.compare(reset.token, hr[0].resetToken);
+        if(match){
+            const hashpwd = await bcrypt.hash(reset.password,parseInt(saltRounds));
+            const resetpwd = await db.query(`update hraccounts set ? where hr_id = ?`,[{password:hashpwd},reset.userid])
+                                        .catch(err=>{
+                                            return res.status(400).json({message:err.sqlMessage});
+                                        });
+        }
+        else{
+            return res.status(401).json({message:"unauthorized password reset, try again"})
+        }
+    }
+    else if(tpo[0]){
+        const match = await bcrypt.compare(reset.token, tpo[0].resetToken);
+        if(match){
+            const hashpwd = await bcrypt.hash(reset.password,parseInt(saltRounds));
+            const resetpwd = await db.query(`update tpoaccounts set ? where tpo_id = ?`,[{password:hashpwd},reset.userid])
+                                        .catch(err=>{
+                                            return res.status(400).json({message:err.sqlMessage});
+                                        });
+        }
+        else{
+            return res.status(401).json({message:"unauthorized password reset, try again"})
+        }
     }
     return res.status(200).json({message:"password resetted"});
 
@@ -526,16 +560,45 @@ const verifymail = asyncHandler(async(req,res)=>{
                             .catch(err=>{
                                 return res.status(400).json({error:err.sqlMessage});
                             });
-    if(!found[0]){
+    const [foundhr] = await db.query(`select hr_id,emailorg from hraccounts where emailorg = ?`,[email])
+                            .catch(err=>{
+                                return res.status(400).json({error:err.sqlMessage});
+                            });
+    const [foundtpo] = await db.query(`select tpo_id,emailorg from tpoaccounts where emailorg = ?`,[email])
+                            .catch(err=>{
+                                return res.status(400).json({error:err.sqlMessage});
+                            });
+    
+    if(!found[0] && !foundhr[0] && !foundtpo[0]){
         return res.status(400).json({error:"email not found"});
     }
-    await axios.post('http://localhost:5000/portal/sendResetPasswordMail',{"userid":found[0].user_id,email})
-                .then(res=>{
-                    console.log(res.data);
-                })
-                .catch(err=>{
-                    console.log(err);
-                });
+    else if(found[0]){
+        await axios.post('http://localhost:5000/portal/sendResetPasswordMail',{"userid":found[0].user_id,email,"role":"user","username":found[0].username})
+                    .then(res=>{
+                        console.log(res.data);
+                    })
+                    .catch(err=>{
+                        console.log(err);
+                    });
+    }
+    else if(foundhr[0]){
+        await axios.post('http://localhost:5000/portal/sendResetPasswordMail',{"userid":foundhr[0].hr_id,email,"role":"hr","username":foundhr[0].firstname})
+                    .then(res=>{
+                        console.log(res.data);
+                    })
+                    .catch(err=>{
+                        console.log(err);
+                    });
+    }
+    else if(foundtpo[0]){
+        await axios.post('http://localhost:5000/portal/sendResetPasswordMail',{"userid":foundtpo[0].tpo_id,email,"role":"tpo","username":foundtpo[0].firstname})
+                    .then(res=>{
+                        console.log(res.data);
+                    })
+                    .catch(err=>{
+                        console.log(err);
+                    });
+    }
     return res.status(200).json({message:"success"});
 });
 

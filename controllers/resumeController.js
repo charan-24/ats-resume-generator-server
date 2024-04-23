@@ -513,8 +513,8 @@ const jsonToPdf = asyncHandler(async (req, res) => {
       parallelUploads3.on("httpUploadProgress", (progress) => {
         console.log(progress);
       });
-
       await parallelUploads3.done();
+      console.log("PDF saved successfully.");
     } catch (e) {
       console.log(e);
     }
@@ -529,7 +529,12 @@ const jsonToPdf = asyncHandler(async (req, res) => {
       .catch((err) => {
         return res.status(400).json({ message: err.sqlMessage });
       });
-    console.log("PDF saved successfully.");
+
+    await db.query(`update useraccounts set resumesused = resumesused + 1 where user_id = ?`,[user_id])
+            .catch(err=>{
+              return res.status(400).json(err.sqlMessage);
+      }); 
+    console.log("db updated");
   });
 
   doc.end();

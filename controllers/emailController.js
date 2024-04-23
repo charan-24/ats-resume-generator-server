@@ -83,7 +83,7 @@ const sendWelcomeBackMail = asyncHandler(async(req,res)=>{
 });
 
 const sendResetPasswordMail = asyncHandler(async(req,res)=>{
-    const {userid} = req.body;
+    const {userid,email,role,username} = req.body;
 
     const client = new SESClient({
         region: regionName,
@@ -93,22 +93,42 @@ const sendResetPasswordMail = asyncHandler(async(req,res)=>{
         }
     });
 
-    const name = "Saicharan";
-    const recipentMail = senderMail;
+    const name = username;
+    const recipentMail = "saicharan@jacinthpaul.com";
     const templateName = "ResetPasswordTemplate";
 
     // console.log(recipentMail)
     let resetToken = crypto.randomBytes(32).toString("hex");
     const hashToken = await bcrypt.hash(resetToken, parseInt(saltRounds));
     const resetLink = `http://localhost:3000/reset-password.php/?token=${resetToken}&user_id=${userid}`;
-
-    const updateResetToken = await db.query(`update useraccounts set ? where user_id = ?`,[{resetToken:hashToken},userid])
+    if(role == "user"){
+        const updateResetToken = await db.query(`update useraccounts set ? where user_id = ?`,[{resetToken:hashToken},userid])
                                      .then(res=>{
                                         console.log("resetToken updated");
                                      })
                                      .catch(err=>{
                                         return res.status(400).json({message:err.sqlMessage});
                                      });
+    }
+    else if(role == "hr"){
+        const updateResetToken = await db.query(`update hraccounts set ? where hr_id = ?`,[{resetToken:hashToken},userid])
+                                     .then(res=>{
+                                        console.log("resetToken updated");
+                                     })
+                                     .catch(err=>{
+                                        return res.status(400).json({message:err.sqlMessage});
+                                     });
+    }
+    else if(role == "tpo"){
+        const updateResetToken = await db.query(`update tpoaccounts set ? where tpo_id = ?`,[{resetToken:hashToken},userid])
+                                     .then(res=>{
+                                        console.log("resetToken updated");
+                                     })
+                                     .catch(err=>{
+                                        return res.status(400).json({message:err.sqlMessage});
+                                     });
+    }
+    
 
     const input = {
         Destination: {
