@@ -24,6 +24,7 @@ const openai = new OpenAI({
 
 const generateResume = asyncHandler(async (req, res) => {
   let resumereq = req.body;
+  console.log(resumereq);
   resumereq.projects = JSON.parse(resumereq.projects);
   resumereq.certificates = JSON.parse(resumereq.certificates);
   console.log(resumereq);
@@ -32,8 +33,7 @@ const generateResume = asyncHandler(async (req, res) => {
     return res.status(401).json({ message: "empty data received" });
   }
 
-  const [jobrole] = await db
-    .query(
+  const [jobrole] = await db.query(
       `select jobrole_name, jobrole_description from jobroles where jobrole_id`,
       [resumereq.jobroleid]
     )
@@ -43,8 +43,7 @@ const generateResume = asyncHandler(async (req, res) => {
 
   //collecting personal details
   const userdetails = [];
-  const [personalresult] = await db
-    .query(`select * from userdetails where user_id = ?`, [
+  const [personalresult] = await db.query(`select * from userdetails where user_id = ?`, [
       parseInt(resumereq.user_id),
     ])
     .catch((err) => {
@@ -55,8 +54,7 @@ const generateResume = asyncHandler(async (req, res) => {
 
   // collecting education
   const education = [];
-  const [eduresult] = await db
-    .query(`select * from educationalDetails where user_id = ?`, [
+  const [eduresult] = await db.query(`select * from educationaldetails where user_id = ?`, [
       parseInt(resumereq.user_id),
     ])
     .catch((err) => {
@@ -67,8 +65,7 @@ const generateResume = asyncHandler(async (req, res) => {
 
   // collecting workexp
   let workexp = [];
-  const workresult = await db
-    .query(`select * from workexperience where user_id = ?`, [
+  const workresult = await db.query(`select * from workexperience where user_id = ?`, [
       parseInt(resumereq.user_id),
     ])
     .catch((err) => {
@@ -82,8 +79,7 @@ const generateResume = asyncHandler(async (req, res) => {
   const projects = [];
   for (let i = 0; i < resumereq?.projects?.length; i++) {
     const projid = resumereq.projects[i];
-    const [projresult] = await db
-      .query(`select * from userprojects where project_id = ?`, [
+    const [projresult] = await db.query(`select * from userprojects where project_id = ?`, [
         parseInt(projid),
       ])
       .catch((err) => {
@@ -101,8 +97,7 @@ const generateResume = asyncHandler(async (req, res) => {
   // console.log(JSON.parse(resumereq?.certificates));
   let certificates = [];
   if (resumereq.certificates) {
-    const certresult = await db
-      .query(`select * from usercertificates where user_id = ?`, [
+    const certresult = await db.query(`select * from usercertificates where user_id = ?`, [
         parseInt(resumereq.user_id),
       ])
       .catch((err) => {
@@ -518,8 +513,8 @@ const jsonToPdf = asyncHandler(async (req, res) => {
       parallelUploads3.on("httpUploadProgress", (progress) => {
         console.log(progress);
       });
-
       await parallelUploads3.done();
+      console.log("PDF saved successfully.");
     } catch (e) {
       console.log(e);
     }
@@ -534,7 +529,12 @@ const jsonToPdf = asyncHandler(async (req, res) => {
       .catch((err) => {
         return res.status(400).json({ message: err.sqlMessage });
       });
-    console.log("PDF saved successfully.");
+
+    await db.query(`update useraccounts set resumesused = resumesused + 1 where user_id = ?`,[user_id])
+            .catch(err=>{
+              return res.status(400).json(err.sqlMessage);
+      }); 
+    console.log("db updated");
   });
 
   doc.end();

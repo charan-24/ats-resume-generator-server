@@ -49,13 +49,7 @@ const validatePayment = asyncHandler(async(req,res)=>{
     }
     const [startdate] = await db.query(`select curdate() as startdate`);
     const [enddate] = await db.query(`select date_add(curdate(),interval 1 year) as enddate`);
-    // const [user] = await db.query(`select user_id from useraccounts where user_id = ?`,[razorpaydetails.user_id])
-    //                         .catch(err=>{
-    //                             return res.status(400).json(err.sqlMessage);
-    //                         });
     const user_id = razorpaydetails.user_id;
-    // console.log(startdate[0].startdate)
-    // console.log(enddate[0].enddate)
     const subobj = {
         "user_id": user_id,
         "plan": "yearly",
@@ -66,7 +60,7 @@ const validatePayment = asyncHandler(async(req,res)=>{
         "payment_id":razorpaydetails.payment_id,
         "order_id":razorpaydetails.order_id,
         "razorpaysignature":razorpaydetails.signature,
-        "resumeplan":10,
+        "resumesplan":10,
         "resumesused":0
     }
     const subs = await db.query(`insert into subscriptions set ?`,subobj)
