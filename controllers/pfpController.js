@@ -18,7 +18,7 @@ const bucketName = process.env.S3_BUCKET;
 
 const uploadPfp = asyncHandler(async(req,res)=>{
     const {userid} = req.params
-    console.log("userid",userid);
+    // console.log("userid",userid);
     const pfpbody = req.body;
     console.log("req.file",req.file);
     const imgBuffer = req.file.buffer; 
@@ -78,7 +78,7 @@ const uploadPfp = asyncHandler(async(req,res)=>{
 
 const getPfp = asyncHandler(async(req,res)=>{
     const { userid } = req.params;
-    console.log(userid);
+    // console.log(userid);
     if (!userid) {
         return res.status(400).json("empty data");
     }
