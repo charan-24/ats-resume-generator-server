@@ -34,7 +34,7 @@ const displayFeedbacks = asyncHandler(async(req,res)=>{
 
 const changeStatus = asyncHandler(async(req,res)=>{
     const {feedback_id,status}  = req.body;
-
+    console.log(feedback_id,status);
     if(!feedback_id || !status){
         return res.status(400).json("empty data");
     }

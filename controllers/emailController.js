@@ -5,6 +5,7 @@ require('dotenv').config();
 const crypto = require('crypto');
 const bcrypt = require('bcrypt');
 const saltRounds = process.env.SALT_ROUNDS; 
+const CLIENT = process.env.CLIENT;
 
 
 const accessKeyId = process.env.AWS_ACCESS_KEYID;  
@@ -100,7 +101,7 @@ const sendResetPasswordMail = asyncHandler(async(req,res)=>{
     // console.log(recipentMail)
     let resetToken = crypto.randomBytes(32).toString("hex");
     const hashToken = await bcrypt.hash(resetToken, parseInt(saltRounds));
-    const resetLink = `http://localhost:3000/reset-password.php/?token=${resetToken}&user_id=${userid}`;
+    const resetLink = CLIENT+`/reset-password.php/?token=${resetToken}&user_id=${userid}`;
     if(role == "user"){
         const updateResetToken = await db.query(`update useraccounts set ? where user_id = ?`,[{resetToken:hashToken},userid])
                                      .then(res=>{

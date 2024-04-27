@@ -4,6 +4,7 @@ const db = require('../database/database');
 const jwt = require('jsonwebtoken');
 const { default: axios } = require('axios');
 const saltRounds = process.env.SALT_ROUNDS; 
+const SERVER = process.env.SERVER;
 
 // registration of user
 const userRegistration = asyncHandler(async (req, res) => {
@@ -465,7 +466,7 @@ const getUserDetails = asyncHandler(async(req,res)=>{
     overview["jobroles"] = jobroles;
     overview["preferredjobs"] = preferredjobs;
     let userpfp=null;
-    await axios.get(`http://localhost:5000/pfp/getpfp/${userid}`)
+    await axios.get(SERVER+`/pfp/getpfp/${userid}`)
                                 .then(res=>{
                                     userpfp = res.data;
                                 })
@@ -477,7 +478,6 @@ const getUserDetails = asyncHandler(async(req,res)=>{
 });
 
 const getAllJobRoles = asyncHandler(async(req,res)=>{
-    console.log("getAllJobRoles");
     const [jobroles] = await db.query(`select * from jobroles`)
                                 .catch(err=>{
                                     return res.status(400).json({message:err.sqlMessage})
@@ -488,6 +488,7 @@ const getAllJobRoles = asyncHandler(async(req,res)=>{
 
 const resetPassword = asyncHandler(async(req,res)=>{
     const reset = req.body;
+    console.log(reset);
     if(!reset || Object.keys(reset).length<3){
         return res.status(400).json({message:"all fields required"});
     }
@@ -519,6 +520,7 @@ const resetPassword = asyncHandler(async(req,res)=>{
         else{
             return res.status(401).json({message:"unauthorized password reset, try again"})
         }
+        console.log("password updated");
     }
     else if(hr[0]){
         const match = await bcrypt.compare(reset.token, hr[0].resetToken);
@@ -532,6 +534,8 @@ const resetPassword = asyncHandler(async(req,res)=>{
         else{
             return res.status(401).json({message:"unauthorized password reset, try again"})
         }
+        console.log("password updated");
+
     }
     else if(tpo[0]){
         const match = await bcrypt.compare(reset.token, tpo[0].resetToken);
@@ -545,6 +549,8 @@ const resetPassword = asyncHandler(async(req,res)=>{
         else{
             return res.status(401).json({message:"unauthorized password reset, try again"})
         }
+        console.log("password updated");
+
     }
     return res.status(200).json({message:"password resetted"});
 
@@ -573,31 +579,35 @@ const verifymail = asyncHandler(async(req,res)=>{
         return res.status(400).json({error:"email not found"});
     }
     else if(found[0]){
-        await axios.post('http://localhost:5000/portal/sendResetPasswordMail',{"userid":found[0].user_id,email,"role":"user","username":found[0].username})
+        await axios.post(SERVER+'/portal/sendResetPasswordMail',{"userid":found[0].user_id,email,"role":"user","username":found[0].username})
                     .then(res=>{
                         console.log(res.data);
                     })
                     .catch(err=>{
                         console.log(err);
                     });
+        console.log("req email");
     }
     else if(foundhr[0]){
-        await axios.post('http://localhost:5000/portal/sendResetPasswordMail',{"userid":foundhr[0].hr_id,email,"role":"hr","username":foundhr[0].firstname})
+        await axios.post(SERVER+'/portal/sendResetPasswordMail',{"userid":foundhr[0].hr_id,email,"role":"hr","username":foundhr[0].firstname})
                     .then(res=>{
                         console.log(res.data);
                     })
                     .catch(err=>{
                         console.log(err);
                     });
+        console.log("req email");
+
     }
     else if(foundtpo[0]){
-        await axios.post('http://localhost:5000/portal/sendResetPasswordMail',{"userid":foundtpo[0].tpo_id,email,"role":"tpo","username":foundtpo[0].firstname})
+        await axios.post(SERVER+'/portal/sendResetPasswordMail',{"userid":foundtpo[0].tpo_id,email,"role":"tpo","username":foundtpo[0].firstname})
                     .then(res=>{
                         console.log(res.data);
                     })
                     .catch(err=>{
                         console.log(err);
                     });
+        console.log("req email");
     }
     return res.status(200).json({message:"success"});
 });

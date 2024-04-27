@@ -12,6 +12,7 @@ const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
 const { Upload } = require("@aws-sdk/lib-storage");
 const crypto = require("crypto");
 const axios = require("axios");
+const SERVER = process.env.SERVER;
 
 const accessKeyId = process.env.AWS_ACCESS_KEYID;
 const secretKey = process.env.AWS_SECRET_KEY;
@@ -155,7 +156,7 @@ const generateResume = asyncHandler(async (req, res) => {
   console.log(projects);
   const resp = await axios
     .post(
-      "http://localhost:5000/resume/jsonToPdf/",
+      SERVER+"/resume/jsonToPdf/",
       {
         userid: resumereq.user_id,
         resumename,
