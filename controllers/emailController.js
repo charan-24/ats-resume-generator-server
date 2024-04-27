@@ -61,7 +61,7 @@ const sendWelcomeBackMail = asyncHandler(async(req,res)=>{
     const name = "Saicharan";
     const dashboardLink = "education.jacinthpaul.com";
     const newFeaturesList = "support@jacinth.com";
-    const recipentMail = senderMail;
+    const recipentMail = "saicharan@jacinthpaul.com";
     const templateName = "WelcomeBackMailTemplate";
 
     console.log(recipentMail)
@@ -85,7 +85,7 @@ const sendWelcomeBackMail = asyncHandler(async(req,res)=>{
 
 const sendResetPasswordMail = asyncHandler(async(req,res)=>{
     const {userid,email,role,username} = req.body;
-
+    console.log(username);
     const client = new SESClient({
         region: regionName,
         credentials:{
@@ -94,14 +94,15 @@ const sendResetPasswordMail = asyncHandler(async(req,res)=>{
         }
     });
 
-    const name = username;
-    const recipentMail = "saicharan@jacinthpaul.com";
+    const name = username || role;
+    const recipentMail = email;
     const templateName = "ResetPasswordTemplate";
 
     // console.log(recipentMail)
     let resetToken = crypto.randomBytes(32).toString("hex");
     const hashToken = await bcrypt.hash(resetToken, parseInt(saltRounds));
     const resetLink = CLIENT+`/reset-password.php/?token=${resetToken}&user_id=${userid}`;
+    // console.log(resetLink);
     if(role == "user"){
         const updateResetToken = await db.query(`update useraccounts set ? where user_id = ?`,[{resetToken:hashToken},userid])
                                      .then(res=>{

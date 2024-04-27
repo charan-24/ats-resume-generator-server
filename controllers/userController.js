@@ -2,7 +2,7 @@ const bcrypt = require('bcrypt');
 const asyncHandler = require('express-async-handler');
 const db = require('../database/database');
 const jwt = require('jsonwebtoken');
-const { default: axios } = require('axios');
+const axios = require('axios');
 const saltRounds = process.env.SALT_ROUNDS; 
 const SERVER = process.env.SERVER;
 
@@ -566,11 +566,11 @@ const verifymail = asyncHandler(async(req,res)=>{
                             .catch(err=>{
                                 return res.status(400).json({error:err.sqlMessage});
                             });
-    const [foundhr] = await db.query(`select hr_id,emailorg from hraccounts where emailorg = ?`,[email])
+    const [foundhr] = await db.query(`select hr_id,emailorg,firstname from hraccounts where emailorg = ?`,[email])
                             .catch(err=>{
                                 return res.status(400).json({error:err.sqlMessage});
                             });
-    const [foundtpo] = await db.query(`select tpo_id,emailorg from tpoaccounts where emailorg = ?`,[email])
+    const [foundtpo] = await db.query(`select tpo_id,emailorg,firstname from tpoaccounts where emailorg = ?`,[email])
                             .catch(err=>{
                                 return res.status(400).json({error:err.sqlMessage});
                             });
@@ -579,35 +579,51 @@ const verifymail = asyncHandler(async(req,res)=>{
         return res.status(400).json({error:"email not found"});
     }
     else if(found[0]){
-        await axios.post(SERVER+'/portal/sendResetPasswordMail',{"userid":found[0].user_id,email,"role":"user","username":found[0].username})
+        const postData = {
+            userid: found[0].user_id, // User ID from your 'found' array
+            email: email,             // Email address
+            role: 'user',             // User role
+            username: found[0].username // Username from the 'found' array
+          };
+        axios.post(`${SERVER}/portal/sendResetPasswordMail`,postData)
                     .then(res=>{
                         console.log(res.data);
                     })
                     .catch(err=>{
                         console.log(err);
                     });
-        console.log("req email");
     }
     else if(foundhr[0]){
-        await axios.post(SERVER+'/portal/sendResetPasswordMail',{"userid":foundhr[0].hr_id,email,"role":"hr","username":foundhr[0].firstname})
+        const postData = {
+            userid: foundhr[0].hr_id, // User ID from your 'found' array
+            email: email,             // Email address
+            role: 'hr',             // User role
+            username: foundhr[0].firstname // Username from the 'found' array
+          };
+          console.log(postData);
+        axios.post(`${SERVER}/portal/sendResetPasswordMail`,postData)
                     .then(res=>{
                         console.log(res.data);
                     })
                     .catch(err=>{
                         console.log(err);
                     });
-        console.log("req email");
 
     }
     else if(foundtpo[0]){
-        await axios.post(SERVER+'/portal/sendResetPasswordMail',{"userid":foundtpo[0].tpo_id,email,"role":"tpo","username":foundtpo[0].firstname})
+        const postData = {
+            userid: foundtpo[0].tpo_id, // User ID from your 'found' array
+            email: email,             // Email address
+            role: 'tpo',             // User role
+            username: foundtpo[0].firstname // Username from the 'found' array
+          };
+        axios.post(`${SERVER}/portal/sendResetPasswordMail`,postData)
                     .then(res=>{
                         console.log(res.data);
                     })
                     .catch(err=>{
                         console.log(err);
                     });
-        console.log("req email");
     }
     return res.status(200).json({message:"success"});
 });
