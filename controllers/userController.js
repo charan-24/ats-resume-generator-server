@@ -9,24 +9,27 @@ const SERVER = process.env.SERVER;
 // registration of user
 const userRegistration = asyncHandler(async (req, res) => {
     const { username, password, cnfpassword, email, first_name, last_name, email_org, 
-        phone_number, linkedinurl, qualification, specialization, college_name, 
+        phone_number, linkedinurl, qualification, specialization, college_id, 
         year_of_grad, cgpa_or_percentage, college_rollno, strength, weakness,
         workexp
     } = req.body;
     console.log(req.body);
-    const [duplicate0] = await db.query(`select username, email from useraccounts where username = ? || email = ?`,[username,email]);
-    const [duplicate1] = await db.query(`select phone_number, email_org from userdetails where phone_number = ? || email_org = ?`,[phone_number,email_org]);
-    
+    const [duplicate0] = await db.query(`select username, email from useraccounts where username = ? || email = ?`,[username,email])
+                                .catch(err=>{
+                                    return res.status(400).json(err.sqlMessage);
+                                });
+    const [duplicate1] = await db.query(`select phone_number, emailorg from userdetails where phone_number = ? || emailorg = ?`,[phone_number,email_org]);
+    console.log(duplicate1);
     if(duplicate0[0]?.username == username){
         return res.status(400).json({message:"usernameerror"});
     }
     else if(duplicate0[0]?.email == email){
         return res.status(400).json({message:"emailerror"});
     }
-    else if(duplicate1[1]?.phone_number == phone_number){
+    else if(duplicate1[0]?.phone_number == phone_number){
         return res.status(400).json({message:"numbererror"});
     }
-    else if(duplicate1[1]?.email_org == email_org){
+    else if(duplicate1[0]?.emailorg == email_org){
         return res.status(400).json({message:"emailorgerror"});
     }
     if(password !== cnfpassword){
@@ -35,24 +38,30 @@ const userRegistration = asyncHandler(async (req, res) => {
     const hashpassword = await bcrypt.hash(password, parseInt(saltRounds));
 
     //adding userAccount details
+    let ua=0;
     const useracctobj = {
         "username": username,
         "password": hashpassword,
         "email": email
     }
-    const sqlUserAcct = `INSERT INTO userAccounts SET ?`;
+    const sqlUserAcct = `INSERT INTO useraccounts SET ?`;
     const account = await db.query(sqlUserAcct, useracctobj)
         .then((res) => {
             console.log("useraccount added");
         })
         .catch(err => {
-            // console.log(err);
+            console.log(err);
+            ua=1;
             return res.status(400).json({message:err.sqlMessage});
         });
-    const [userid] = await db.query(`select user_id from userAccounts where username = ?`, [username]);
+    if(ua==1){
+        return;
+    }
+    const [userid] = await db.query(`select user_id from useraccounts where username = ?`, [username]);
     console.log("userid:" + userid[0].user_id)
 
     //adding userDetails
+    let ud=0;
     const userdetailsobj = {
         "user_id": userid[0].user_id,
         "username": username,
@@ -66,45 +75,56 @@ const userRegistration = asyncHandler(async (req, res) => {
         "weakness": weakness || ""
     }
 
-    const sqluserdetail = `insert into userDetails set ?`;
+    const sqluserdetail = `insert into userdetails set ?`;
     const details = await db.query(sqluserdetail, userdetailsobj)
         .then(res => {
             console.log("details added");
         })
         .catch(err => {
-            // console.log(err);
+            console.log(err);
+            ud=1;
             return res.status(400).json({message:err.sqlMessage});
         });
-
+        if(ud==1)
+            return;
     //adding educationalDetails 
+    const [college_name] = await db.query(`select collegename from colleges where college_id = ?`,[college_id])
+                                .catch(err=>{
+                                    return res.status(400).json(err.sqlMessage)
+                                });
+    let ed=0;
     const educationobj = {
         "user_id": userid[0].user_id,
         "username": username,
         "qualification": qualification,
         "specialization": specialization,
-        "college_name": college_name,
+        "college_id":college_id,
+        "college_name": college_name[0].collegename,
         "year_of_grad": year_of_grad,
         "cgpa_or_percentage": cgpa_or_percentage,
         "college_rollno": college_rollno
     }
 
-    const sqleducation = `insert into educationalDetails set ?`;
+    const sqleducation = `insert into educationaldetails set ?`;
     const education = await db.query(sqleducation, educationobj)
         .then(res => {
             console.log("education added");
         })
         .catch(err => {
-            // console.log(err);
+            console.log(err);
+            ed=1;
             return res.status(400).json({message:err.sqlMessage});
         });
+    if(ed==1)
+        return;
 
     //adding workExperience 
+    let w=0;
     if(workexp){
         for(let i=0;i<workexp.length;i++){
             const work = workexp[i];
             const workobj = {
                 "user_id":userid[0].user_id,
-                "username": username,
                 "company_name":work.company_name,
                 "job_title":work.job_title,
                 "start_date":work.start_date,
@@ -112,18 +132,21 @@ const userRegistration = asyncHandler(async (req, res) => {
                 "job_description":work.job_description,
                 "technologies_used":work.technologies_used
             }
-            const sqlwork = `insert into workExperience set ?`;
+            const sqlwork = `insert into workexperience set ?`;
             const works = await db.query(sqlwork,workobj)
-                                .then(res=>{
-                                    console.log("work experience added");
-                                })
                                 .catch(err=>{
-                                    // console.log(err);
+                                    console.log(err);
+                                    w=1;
                                     return res.status(400).json({message:err.sqlMessage});
                                 })
+            if(w==1){
+                break;
+            }
         }
     }
-    return res.status(200).json({message:"useradded",userid:userid[0].user_id});
+    if(w!=1){
+        return res.status(200).json({message:"useradded",userid:userid[0].user_id});
+    }
 });
 
 //select preferred roles

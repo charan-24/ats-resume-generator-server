@@ -9,7 +9,7 @@ router.post('/adminLogin',adminController.adminLogin);
 // router.use(verifyJWT);
 router.get('/getAdminOverview',adminController.getAdminOverview);
 router.get('/getUsers',adminController.getUsers);
-router.post('/addjobroles',adminController.addjobroles);
+// router.post('/addjobroles',adminController.addjobroles);
 router.get('/getAllJobs',adminController.getAllJobs);
 router.post('/addAJob',adminController.addAJob);
 router.post('/addBulkJobs',adminController.addBulkJobs);
@@ -22,5 +22,7 @@ router.post('/addMeetup',adminController.addMeetup);
 router.post('/addHackathonWinner',adminController.addHackathonWinner);
 router.post('/addContestWinner',adminController.addContestWinner);
 router.post('/addMeetupWinner',adminController.addMeetupWinner);
+// router.post('/addColleges',adminController.addColleges);
+router.get('/getColleges',adminController.getColleges);
 
 module.exports = router;

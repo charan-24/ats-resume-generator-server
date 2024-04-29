@@ -101,20 +101,21 @@ const getUsers = asyncHandler(async (req, res) => {
 });
 
 const addjobroles = asyncHandler(async(req,res)=>{
-    const {jobrole_name} = req.body;
-    if(!jobrole_name){
-        return res.status(400).json({message:"job role required"});
+    const jobroles = req.body;
+    if(jobroles.length==0){
+        return res.status(204).json({"error":"no data"});
     }
-    const [duplicate] = await db.query(`select * from jobroles where jobrole_name = ?`,[jobrole_name]);
-    if(duplicate[0]){
-        return res.status(400).json({message:"job role duplicate found"});
+    for(let i=0;i<jobroles.length;i++){
+        const jobrole = jobroles[i];
+        const addrole = await db.query(`insert into jobroles set ?`,[jobrole])
+                                .catch(err=>{
+                                    return res.status(400).json(err.sqlMessage);
+                                });
     }
-    const addrole = await db.query(`insert into jobroles set ?`,{"jobrole_name":jobrole_name})
-                            .catch(err=>{
-                                return res.status(400).json({message:err.sqlMessage});
-                            });
-    return res.status(200).json({message:"jobrole added"});
+    return res.status(200).json({message:"jobroles added"});
 });
+
+
 
 const getAllJobs = asyncHandler(async(req,res)=>{
     const sql = `select * from jobslisted;`;
@@ -226,6 +227,27 @@ const deleteUser = asyncHandler(async(req,res)=>{
                             .catch(err=>{
                                 return res.status(201).json({message:err.sqlMessage});
                             })
+    const usercertificates = await db.query(`delete from usercertificates where user_id = ?`,[user_id])
+                                        .then(res=>{
+                                            console.log("certificates deleted");                                
+                                        })
+                                        .catch(err=>{
+                                            return res.status(201).json({message:err.sqlMessage});
+                                        });
+    const userprojects = await db.query(`delete from userprojects where user_id = ?`,[user_id])
+                                        .then(res=>{
+                                            console.log("userprojects deleted");                                
+                                        })
+                                        .catch(err=>{
+                                            return res.status(201).json({message:err.sqlMessage});
+                                        });
+    const feedbacks = await db.query(`delete from feedbacks where user_id = ?`,[user_id])
+                                        .then(res=>{
+                                            console.log("feedbacks deleted");                                
+                                        })
+                                        .catch(err=>{
+                                            return res.status(201).json({message:err.sqlMessage});
+                                        });
     const education = await db.query(`delete from educationaldetails where user_id = ?`,[user_id])
                                 .then(res=>{
                                     console.log("educational details deleted");                                
@@ -381,6 +403,29 @@ const adminLogin = asyncHandler(async(req,res)=>{
     return res.status(400).json({message:"wrongpwd"});
 });
 
+const addColleges = asyncHandler(async(req,res)=>{
+    const colleges = req.body;
+    if(colleges.length === 0){
+        return res.status(204).json({message:"no colleges data"});
+    }
+    for(let i=0;i<colleges.length;i++){
+        const college = colleges[i];
+        const addclg = await db.query(`insert into colleges set ?`,[college])
+                                .catch(err=>{
+                                    return res.status(400).json(err.sqlMessage);
+                                });
+    }
+    return res.status(200).json("colleges added");
+});
+
+const getColleges = asyncHandler(async(req,res)=>{
+    const [colleges] = await db.query(`select * from colleges`)
+                                .catch(err=>{
+                                    return res.status(400).json(err.sqlMessage)
+                                });
+    return res.status(200).json(colleges);
+})
+
 
 
 module.exports = {
@@ -400,5 +445,7 @@ module.exports = {
     addContestWinner,
     addMeetupWinner,
     adminRegister,
-    adminLogin
+    adminLogin,
+    addColleges,
+    getColleges
 }
