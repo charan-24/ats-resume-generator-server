@@ -73,6 +73,15 @@ const getMeetupWinners = asyncHandler(async(req,res)=>{
     return res.status(200).json(winners);
 });
 
+const getEventStats = asyncHandler(async(req,res)=>{
+    const [stats] = await db.query(`select * from eventstats`)
+                            .catch(err=>{
+                                return res.status(400).json(err.sqlMessage);
+                            });
+    console.log(stats);
+    return  res.status(400).json(stats[0]);
+})
+
 module.exports = {
     getUpComingHackathons,
     getRecentHackathons,
@@ -82,6 +91,7 @@ module.exports = {
     getRecentMeetups,
     getHackathonWinners,
     getContestWinners,
-    getMeetupWinners
+    getMeetupWinners,
+    getEventStats
 }
 

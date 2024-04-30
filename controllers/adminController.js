@@ -80,6 +80,12 @@ const getAdminOverview = asyncHandler(async(req,res)=>{
                                 });  
     adminoverview["meetupwinners"] = meetupwinners;
 
+    const [stats] = await db.query(`select * from eventstats`)
+                            .catch(err=>{
+                                return res.status(400).json(err.sqlMessage);
+                            });
+    adminoverview["eventstats"] = stats[0];
+
     const [resumereqs] = await db.query(`select count(*) as resumereqs from userresumes`)
                                     .catch(err=>{
                                         return res.status(400).json(err.sqlMessage);
@@ -424,7 +430,20 @@ const getColleges = asyncHandler(async(req,res)=>{
                                     return res.status(400).json(err.sqlMessage)
                                 });
     return res.status(200).json(colleges);
-})
+});
+
+const updateStats = asyncHandler(async(req,res)=>{
+    const stats = req.body;
+    if(!stats || Object.keys(stats).length==0){
+        return res.status(400).json({message:"no data"});
+    }
+
+    const updatestat = await db.query(`update eventstats set ? where stat_id = 1`,[stats])
+                                .catch(err=>{
+                                    return res.status(400).json(err.sqlMessage)
+                                });
+    return res.status(200).json({message:"stats updated"});
+});
 
 
 
@@ -447,5 +466,6 @@ module.exports = {
     adminRegister,
     adminLogin,
     addColleges,
-    getColleges
+    getColleges,
+    updateStats
 }

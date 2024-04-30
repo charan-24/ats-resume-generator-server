@@ -11,5 +11,6 @@ router.get('/getRecentMeetups',eventsController.getRecentMeetups);
 router.get('/getHackathonWinners',eventsController.getHackathonWinners);
 router.get('/getContestWinners',eventsController.getContestWinners);
 router.get('/getMeetupWinners',eventsController.getMeetupWinners);
+router.get('/getEventStats',eventsController.getEventStats);
 
 module.exports = router;
