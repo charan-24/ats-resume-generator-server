@@ -98,7 +98,7 @@ const userRegistration = asyncHandler(async (req, res) => {
         "username": username,
         "qualification": qualification,
         "specialization": specialization,
-        // "college_id":college_id,
+        "college_id":1,
         "college_name": college_name,
         "year_of_grad": year_of_grad,
         "cgpa_or_percentage": cgpa_or_percentage,
