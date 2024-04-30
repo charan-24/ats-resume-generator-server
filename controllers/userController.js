@@ -9,7 +9,7 @@ const SERVER = process.env.SERVER;
 // registration of user
 const userRegistration = asyncHandler(async (req, res) => {
     const { username, password, cnfpassword, email, first_name, last_name, email_org, 
-        phone_number, linkedinurl, qualification, specialization, college_id, 
+        phone_number, linkedinurl, qualification, specialization, college_name, 
         year_of_grad, cgpa_or_percentage, college_rollno, strength, weakness,
         workexp
     } = req.body;
@@ -88,18 +88,18 @@ const userRegistration = asyncHandler(async (req, res) => {
         if(ud==1)
             return;
     //adding educationalDetails 
-    const [college_name] = await db.query(`select collegename from colleges where college_id = ?`,[college_id])
-                                .catch(err=>{
-                                    return res.status(400).json(err.sqlMessage)
-                                });
+    // const [college_name] = await db.query(`select collegename from colleges where college_id = ?`,[college_id])
+    //                             .catch(err=>{
+    //                                 return res.status(400).json(err.sqlMessage)
+    //                             });
     let ed=0;
     const educationobj = {
         "user_id": userid[0].user_id,
         "username": username,
         "qualification": qualification,
         "specialization": specialization,
-        "college_id":college_id,
-        "college_name": college_name[0].collegename,
+        // "college_id":college_id,
+        "college_name": college_name,
         "year_of_grad": year_of_grad,
         "cgpa_or_percentage": cgpa_or_percentage,
         "college_rollno": college_rollno
