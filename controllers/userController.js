@@ -154,7 +154,7 @@ const selectPreferredRoles = asyncHandler(async(req,res)=>{
     let {user_id,preferredroles} = req.body;
     user_id = parseInt(user_id);
     preferredroles = JSON.parse(preferredroles);
-    // console.log(preferredroles);
+    console.log(preferredroles);
     let userpreferences = await db.query(`select * from preferredjobroles where user_id = ?`,[user_id])
                                     .catch(err=>{
                                         return res.status(400).json({message:err.sqlMessage});

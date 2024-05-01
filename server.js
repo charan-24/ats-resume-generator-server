@@ -3,6 +3,7 @@ const exp = require('express');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
 const app=exp();
+const port = process.env.PORT;
 
 //middlewares
 app.use(cors());
@@ -28,6 +29,6 @@ app.use('/portal',require('./routes/portal'));
 app.use('/pfp',require('./routes/pfp'));
 app.use('/logout',require('./routes/logout'));
 
-app.listen(process.env.HOST || 5000,()=>{
-    console.log("server started on port 5000");
+app.listen(port,()=>{
+    console.log(`server started on port ${port}`);
 });
