@@ -92,6 +92,7 @@ const userRegistration = asyncHandler(async (req, res) => {
                                 .catch(err=>{
                                     return res.status(400).json(err.sqlMessage)
                                 });
+    console.log(college_name[0].collegename);
     let ed=0;
     const educationobj = {
         "user_id": userid[0].user_id,
@@ -99,7 +100,7 @@ const userRegistration = asyncHandler(async (req, res) => {
         "qualification": qualification,
         "specialization": specialization,
         "college_id":college_id,
-        "college_name": college_name[0].college_name,
+        "college_name": college_name[0].collegename || "X",
         "year_of_grad": year_of_grad,
         "cgpa_or_percentage": cgpa_or_percentage,
         "college_rollno": college_rollno
