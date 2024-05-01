@@ -85,6 +85,8 @@ const sendWelcomeBackMail = asyncHandler(async(req,res)=>{
 
 const sendResetPasswordMail = asyncHandler(async(req,res)=>{
     const {userid,email,role,username} = req.body;
+    if(!userid)
+        return res.status(400).json({message:"no user"});
     console.log(username);
     const client = new SESClient({
         region: regionName,

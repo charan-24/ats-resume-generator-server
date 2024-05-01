@@ -3,7 +3,7 @@ const exp = require('express');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
 const app=exp();
-const port = process.env.PORT;
+const port = process.env.PORT || 5000;
 
 //middlewares
 app.use(cors());
