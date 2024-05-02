@@ -473,7 +473,7 @@ const getUserDetails = asyncHandler(async(req,res)=>{
                                 .catch(err=>{
                                     return res.status(400).json({message:err.sqlMessage})
                                 });
-    const preferredsql = `select * from jobslisted, preferredjobroles as pr where pr.user_id = ? and pr.jobrole_id = jobslisted.jobrole_id order by jobslisted.posted_date`; 
+    const preferredsql = `select * from jobslisted, preferredjobroles as pr where pr.user_id = ? and pr.jobrole_id = jobslisted.jobrole_id order by jobslisted.posted_date desc`; 
     const [preferredjobs] = await db.query(preferredsql,[userid])
                             .catch(err=>{
                                 return res.status(400).json({message:err.sqlMessage});

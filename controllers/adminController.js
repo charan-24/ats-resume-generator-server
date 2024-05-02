@@ -133,9 +133,9 @@ const getAllJobs = asyncHandler(async(req,res)=>{
 });
 
 const addAJob = asyncHandler(async(req,res)=>{
-    const {jobrole_id, jobtitle, location, company, jobtype, experience, description} = req.body;
-
-    if(!jobrole_id || !jobtitle || !location || !company || !jobtype || !experience || !description){
+    const {jobrole_id, jobtitle, location, company, jobtype, experience, description,joburl} = req.body;
+    console.log(req.body);
+    if(!jobrole_id || !jobtitle || !location || !company || !jobtype || !experience || !description || joburl){
         return res.status(401).json({message:"all fields required"});
     }
     const jobobj = {
@@ -144,8 +144,9 @@ const addAJob = asyncHandler(async(req,res)=>{
         "company":company,
         "description":description,
         "location":location,
-        "job_type":jobtype,
+        "jobtype":jobtype,
         "experience":experience,
+        "joburl":joburl,
     };
 
     const jobaddsql = `insert into jobslisted set ?`;
