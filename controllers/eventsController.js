@@ -78,7 +78,7 @@ const getEventStats = asyncHandler(async(req,res)=>{
                             .catch(err=>{
                                 return res.status(400).json(err.sqlMessage);
                             });
-    console.log(stats);
+    // console.log(stats);
     return  res.status(400).json(stats[0]);
 })
 

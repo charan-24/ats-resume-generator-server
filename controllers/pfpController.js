@@ -83,14 +83,14 @@ const getPfp = asyncHandler(async(req,res)=>{
         return res.status(400).json("empty data");
     }
 
-    const [pfppath] = await db
-        .query(`select pfpawspath from userpfps where user_id = ?`, [
-        userid,
-        ])
-        .catch((err) => {
-        return res.status(400).json({ message: err.sqlMessage });
-        });
-    // console.log(resumepath[0].resumeawspath);
+    const [pfppath] = await db.query(`select pfpawspath from userpfps where user_id = ?`,[userid])
+                                .catch((err) => {
+                                return res.status(400).json({ message: err.sqlMessage });
+                                });
+    // console.log(pfppath[0]);
+    if(!pfppath[0]){
+        return res.status(400).json(null);
+    }
     const s3 = new S3Client({
         region: regionName,
         credentials: {

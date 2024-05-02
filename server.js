@@ -4,6 +4,7 @@ const cookieParser = require('cookie-parser');
 const cors = require('cors');
 const app=exp();
 const port = process.env.PORT || 5000;
+console.log(port);
 
 //middlewares
 app.use(cors());

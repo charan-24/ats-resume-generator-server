@@ -198,14 +198,14 @@ const jsonToPdf = asyncHandler(async (req, res) => {
     Education: [],
     Experience: [],
     Projects: [],
-    Extracurriculars: [
-      "Committee member of Turing Hut, the Programming Club at VNR VJIET. Developed visually appealing posters and created informative documents to enhance communication and promotion of club events. Organized and facilitated coding contests, workshops, created posters and made documents and peer-to-peer teaching sessions as part of the club’s initiatives.",
-      "Attended a 10 days Bootcamp conducted by the WE program. It covered self-learning tools, modern programming languages and corporate skills.",
-    ],
-    "Honors and Awards": [
-      "Awarded a scholarship for getting selected into the Women Engineers Program offered by TalentSprint, supported by Google which focuses on technical and corporate skills training. I am one of the top 1% of scholars selected from over 27,000+ eligible applicants across the country for this highly selective program.",
-      "Achieved third place in the Wiki Women Hackathon hosted at IIIT Hyderabad, showcasing strong collaborative skills, tech",
-    ],
+    // Extracurriculars: [
+    //   "Committee member of Turing Hut, the Programming Club at VNR VJIET. Developed visually appealing posters and created informative documents to enhance communication and promotion of club events. Organized and facilitated coding contests, workshops, created posters and made documents and peer-to-peer teaching sessions as part of the club’s initiatives.",
+    //   "Attended a 10 days Bootcamp conducted by the WE program. It covered self-learning tools, modern programming languages and corporate skills.",
+    // ],
+    // "Honors and Awards": [
+    //   "Awarded a scholarship for getting selected into the Women Engineers Program offered by TalentSprint, supported by Google which focuses on technical and corporate skills training. I am one of the top 1% of scholars selected from over 27,000+ eligible applicants across the country for this highly selective program.",
+    //   "Achieved third place in the Wiki Women Hackathon hosted at IIIT Hyderabad, showcasing strong collaborative skills, tech",
+    // ],
   };
   if (jsondata?.userdetails[0]?.linkedinurl) {
     resumeContent["Linkedin"] = jsondata?.userdetails[0].linkedinurl;
@@ -447,23 +447,25 @@ const jsonToPdf = asyncHandler(async (req, res) => {
   });
 
   // Add Extracurriculars Section
-  generateHeading("Extracurriculars");
-  generateLine();
-  resumeContent.Extracurriculars.forEach((activity) => {
-    generateBulletPoint();
-    generateContent(capitalizeFirstLetterOfSentence(activity));
-    addNewLine(1.5);
-  });
+  // generateHeading("Extracurriculars");
+  // generateLine();
+  // resumeContent.Extracurriculars.forEach((activity) => {
+  //   generateBulletPoint();
+  //   generateContent(capitalizeFirstLetterOfSentence(activity));
+  //   addNewLine(1.5);
+  // });
 
   // Add Honors and Awards Section
-  generateHeading("Honors and Awards");
-  generateLine();
-  resumeContent["Honors and Awards"].forEach((award) => {
-    generateBulletPoint();
-    generateContent(capitalizeFirstLetterOfSentence(award));
-    addNewLine(1.5);
-  });
+  // generateHeading("Honors and Awards");
+  // generateLine();
+  // resumeContent["Honors and Awards"].forEach((award) => {
+  //   generateBulletPoint();
+  //   generateContent(capitalizeFirstLetterOfSentence(award));
+  //   addNewLine(1.5);
+  // });
 
+  addNewLine(1);
+  addNewLine(1);
   addNewLine(1);
 
   // Add Declaration

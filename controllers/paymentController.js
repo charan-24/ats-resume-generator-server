@@ -63,6 +63,7 @@ const validatePayment = asyncHandler(async(req,res)=>{
         "resumesplan":10,
         "resumesused":0
     }
+    // console.log(subobj);
     const subs = await db.query(`insert into subscriptions set ?`,subobj)
                           .catch(err=>{
                             return res.status(400).json({message: err.sqlMessage});

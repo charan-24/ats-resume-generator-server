@@ -495,8 +495,8 @@ const getUserDetails = asyncHandler(async(req,res)=>{
                                     userpfp = res.data;
                                 })
                                 .catch(err=>{
-                                    console.log(err);
-                                });
+                                    userpfp = null;
+                                })
     overview["userpfp"] = userpfp;
     return res.status(200).json(overview);
 });
