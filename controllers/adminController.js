@@ -160,32 +160,33 @@ const addAJob = asyncHandler(async(req,res)=>{
 
 const addBulkJobs = asyncHandler(async(req,res)=>{
     const bulkjobs = req.body;
-    console.log(bulkjobs);
-    // if(!bulkjobs || bulkjobs.length===0){
-    //     return res.status(401).json({message:"jobs provided are empty"});
-    // }
+    // console.log(bulkjobs);
+    if(!bulkjobs || bulkjobs.length===0){
+        return res.status(401).json({message:"jobs provided are empty"});
+    }
 
-    // for(let i=0;i<bulkjobs.length;i++){
-    //     const job = bulkjobs[i];
-    //     const jobobj = {
-    //         "jobrole_id":job.jobrole_id,
-    //         "title":job.title,
-    //         "company":job.company,
-    //         "description":job.description,
-    //         "location":job.location,
-    //         "job_type":job.type,
-    //         "experience":job.experience,
-    //     };
-    //     if(job.salary){
-    //         jobobj["salary"]=job.salary;
-    //     }
-    //     const jobaddsql = `insert into jobslisted set ?`;
-    //     const jobadded = await db.query(jobaddsql,jobobj)
-    //                                 .catch(err=>{
-    //                                     console.log(err);
-    //                                     return res.status(400).json({message:err.sqlMessage});
-    //                                 });
-    // }
+    for(let i=0;i<bulkjobs.length;i++){
+        const job = bulkjobs[i];
+        const jobobj = {
+            "jobrole_id":job.jobrole_id,
+            "title":job.title,
+            "company":job.company,
+            "description":job.description,
+            "location":job.location,
+            "jobtype":job.jobtype,
+            "experience":job.experience,
+            "joburl":job.joburl
+        };
+        if(job.salary){
+            jobobj["salary"]=job.salary;
+        }
+        const jobaddsql = `insert into jobslisted set ?`;
+        const jobadded = await db.query(jobaddsql,jobobj)
+                                    .catch(err=>{
+                                        console.log(err);
+                                        return res.status(400).json({message:err.sqlMessage});
+                                    });
+    }
     return res.status(200).json({message:bulkjobs.length + ` new jobs are added`});
 });
 
