@@ -8,32 +8,29 @@ const SERVER = process.env.SERVER;
 
 // registration of user
 const userRegistration = asyncHandler(async (req, res) => {
-    const { username, password, cnfpassword, email, first_name, last_name, email_org, 
-        phone_number, linkedinurl, qualification, specialization, college_id, 
-        year_of_grad, cgpa_or_percentage, college_rollno, strength, weakness,
-        workexp
+    const { username, password, email, firstname, lastname, emailorg, 
+        phonenumber, linkedinurl, qualification, specialization, college_id, 
+        year_of_grad, cgpa_or_percentage, college_rollno, strength, weakness
     } = req.body;
     console.log(req.body);
+
     const [duplicate0] = await db.query(`select username, email from useraccounts where username = ? || email = ?`,[username,email])
                                 .catch(err=>{
                                     return res.status(400).json(err.sqlMessage);
                                 });
-    const [duplicate1] = await db.query(`select phone_number, emailorg from userdetails where phone_number = ? || emailorg = ?`,[phone_number,email_org]);
-    console.log(duplicate1);
+    const [duplicate1] = await db.query(`select phonenumber, emailorg from userdetails where phonenumber = ? || emailorg = ?`,[phonenumber,emailorg]);
+    console.log(duplicate0);
     if(duplicate0[0]?.username == username){
-        return res.status(400).json({message:"usernameerror"});
+        return res.status(400).json({message:"username"});
     }
     else if(duplicate0[0]?.email == email){
-        return res.status(400).json({message:"emailerror"});
+        return res.status(400).json({message:"email"});
     }
-    else if(duplicate1[0]?.phone_number == phone_number){
-        return res.status(400).json({message:"numbererror"});
+    else if(duplicate1[0]?.phonenumber == phonenumber){
+        return res.status(400).json({message:"phonenumber"});
     }
-    else if(duplicate1[0]?.emailorg == email_org){
-        return res.status(400).json({message:"emailorgerror"});
-    }
-    if(password !== cnfpassword){
-        return res.status(400).json({message:"passwords doesn't match"})
+    else if(duplicate1[0]?.emailorg == emailorg){
+        return res.status(400).json({message:"emailorg"});
     } 
     const hashpassword = await bcrypt.hash(password, parseInt(saltRounds));
 
@@ -54,9 +51,9 @@ const userRegistration = asyncHandler(async (req, res) => {
             ua=1;
             return res.status(400).json({message:err.sqlMessage});
         });
-    if(ua==1){
-        return;
-    }
+    // if(ua==1){
+    //     return;
+    // }
     const [userid] = await db.query(`select user_id from useraccounts where username = ?`, [username]);
     console.log("userid:" + userid[0].user_id)
 
@@ -65,11 +62,11 @@ const userRegistration = asyncHandler(async (req, res) => {
     const userdetailsobj = {
         "user_id": userid[0].user_id,
         "username": username,
-        "firstname": first_name,
-        "lastname": last_name,
+        "firstname": firstname,
+        "lastname": lastname,
         "email": email,
-        "emailorg": email_org,
-        "phone_number": phone_number,
+        "emailorg": emailorg,
+        "phonenumber": phonenumber,
         "linkedinurl":linkedinurl || "",
         "strength": strength || "",
         "weakness": weakness || ""
@@ -85,8 +82,8 @@ const userRegistration = asyncHandler(async (req, res) => {
             ud=1;
             return res.status(400).json({message:err.sqlMessage});
         });
-        if(ud==1)
-            return;
+        // if(ud==1)
+        //     return;
     //adding educationalDetails 
     const [college_name] = await db.query(`select collegename from colleges where college_id = ?`,[college_id])
                                 .catch(err=>{
@@ -116,38 +113,14 @@ const userRegistration = asyncHandler(async (req, res) => {
             ed=1;
             return res.status(400).json({message:err.sqlMessage});
         });
-    if(ed==1)
-        return;
+    // if(ed==1)
+    //     return;
 
-    //adding workExperience 
-    let w=0;
-    if(workexp){
-        for(let i=0;i<workexp.length;i++){
-            const work = workexp[i];
-            const workobj = {
-                "user_id":userid[0].user_id,
-                "company_name":work.company_name,
-                "job_title":work.job_title,
-                "start_date":work.start_date,
-                "end_date":work.end_date,
-                "job_description":work.job_description,
-                "technologies_used":work.technologies_used
-            }
-            const sqlwork = `insert into workexperience set ?`;
-            const works = await db.query(sqlwork,workobj)
-                                .catch(err=>{
-                                    console.log(err);
-                                    w=1;
-                                    return res.status(400).json({message:err.sqlMessage});
-                                })
-            if(w==1){
-                break;
-            }
-        }
-    }
-    if(w!=1){
-        return res.status(200).json({message:"useradded",userid:userid[0].user_id});
-    }
+    return res.status(200).json({message:"useradded",userid:userid[0].user_id});
+    // return res.status(200).json({message:"useradded",userid:15});
+
+    // return res.status(200).json("no duplicates");
+
 });
 
 //select preferred roles
@@ -297,17 +270,17 @@ const addWorkExp = asyncHandler(async(req,res)=>{
 });
 
 const deleteWorkExp = asyncHandler(async(req,res)=>{
-    const {work_id} = req.body;
-    if(!work_id){
+    const {workid} = req.params;
+    if(!workid){
         return res.status(401).json({message:"work_id required"});
     }    
 
-    const [foundwork] = await db.query(`select work_id from workexperience where work_id = ?`,[work_id]);
+    const [foundwork] = await db.query(`select work_id from workexperience where work_id = ?`,[workid]);
     if(!foundwork[0]){
-        return res.status(401).json({message:"no work found"});
+        return res.status(204).json({message:"no work found"});
     }
 
-    const delwork = await db.query(`delete from workexperience where work_id = ?`,[work_id])
+    const delwork = await db.query(`delete from workexperience where work_id = ?`,[workid])
                             .catch(err=>{
                                 return res.status(400).json({message:err.sqlMessage});
                             })
@@ -322,9 +295,9 @@ const userLogin = asyncHandler(async(req,res)=>{
     if(!password){
         return res.status(400).json({message:"password required"})        
     }
-    const [foundUser] = await db.query(`select user_id, password, username, role from useraccounts where username = ? || email = ?`,[username,username]);
+    const [foundUser] = await db.query(`select user_id, password, username, role, subscribed from useraccounts where username = ? || email = ?`,[username,username]);
     // console.log(foundUser[0]);
-    if(!foundUser[0] || !Object.keys(foundUser[0]).length){
+    if(!foundUser[0] || !Object.keys(foundUser[0]).length || !foundUser[0].subscribed){
         return res.status(401).json({message:"user not found"});
     }
     const match = await bcrypt.compare(password,foundUser[0].password);

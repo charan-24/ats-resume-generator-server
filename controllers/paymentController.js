@@ -7,7 +7,7 @@ const Razorpay = require('razorpay');
 const createOrder = asyncHandler(async(req,res)=>{
     const {username,amount} = req.body;
     console.log(req.body);
-    const [user] = await db.query(`select user_id,firstname,lastname,email, phone_number from userdetails where username = ?`,[username])
+    const [user] = await db.query(`select user_id,firstname,lastname,email, phonenumber from userdetails where username = ?`,[username])
                             .catch(err=>{
                                 return res.status(400).json(err.sqlMessage);
                             });
