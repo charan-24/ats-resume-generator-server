@@ -12,6 +12,7 @@ router.post('/selectPreferredRoles',userController.selectPreferredRoles);
 router.get('/getPreferredRoles/:userid',userController.getPreferredRoles);
 router.post('/editUserProfile',userController.editUserProfile);
 router.post('/addWorkExp',userController.addWorkExp);
+router.post('/editWorkExp',userController.editWorkExp);
 router.delete('/deleteWorkExp/:workid',userController.deleteWorkExp);
 router.get('/getPreferredJobs/:userid',userController.getPreferredJobs);
 router.post('/addProject',userController.addProject);

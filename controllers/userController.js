@@ -269,6 +269,54 @@ const addWorkExp = asyncHandler(async(req,res)=>{
     return res.status(200).json("workadded");
 });
 
+const editWorkExp = asyncHandler(async(req,res)=>{
+    const editwork = req.body;
+    // console.log(editwork);
+    if(!editwork){
+        return res.status(204).json({message:"no data provided"});
+    }
+    const workid = editwork.work_id;
+    const [currwork] = await db.query(`select job_description, technologies_used from workexperience where work_id = ?`,[workid])
+                                .catch(err=>{
+                                    return res.status(400).json(err.sqlMessage);
+                                });
+    // console.log(currwork);
+    let currjd = currwork[0].job_description;
+    currjd = currjd.toLowerCase().replace(/ /g,'');
+    let newjd = editwork.job_description;
+    newjd = newjd.toLowerCase().replace(/ /g,'');
+
+    // console.log(currjd);
+    // console.log(newjd);
+
+    let currtech = currwork[0].technologies_used;
+    currtech = currtech.toLowerCase().replace(/ /g,'');
+    let newtech = editwork.technologies_used;
+    newtech = newtech.toLowerCase().replace(/ /g,'');
+
+    // console.log(currtech);
+    // console.log(newtech);
+
+    if(currjd == newjd && currtech == newtech){
+        console.log("no changes biyatch");
+        return res.status(400).json({message:"no changes"});
+    } 
+    if(currjd != newjd){
+        await db.query(`update workexperience set ? where work_id = ?`,[{"job_description":editwork.job_description},workid])
+                .catch(err=>{
+                    return res.status(400).json(err.sqlMessage);
+                });
+    }
+    if(currtech != newtech){
+        await db.query(`update workexperience set ? where work_id = ?`,[{"technologies_used":editwork.technologies_used},workid])
+                .catch(err=>{
+                    return res.status(400).json(err.sqlMessage);
+                });
+    }
+
+    return res.status(200).json({message:"updated"});
+})
+
 const deleteWorkExp = asyncHandler(async(req,res)=>{
     const {workid} = req.params;
     if(!workid){
@@ -642,5 +690,6 @@ module.exports = {
     getUserDetails,
     getAllJobRoles,
     resetPassword,
-    verifymail
+    verifymail,
+    editWorkExp
 }

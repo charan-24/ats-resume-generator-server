@@ -106,6 +106,27 @@ const getUsers = asyncHandler(async (req, res) => {
     return res.status(200).send(result[0]);
 });
 
+const getUsersOfACollege = asyncHandler(async(req,res)=>{
+    const {college_id} = req.params;
+    if(!college_id){
+        return res.status(400).json({message:"no collegeid"});
+    }
+    if(college_id == -1){
+        const [users] = await db.query(`select count(user_id) as users from useraccounts`)
+                            .catch(err=>{
+                                return res.status(400).json(err.sqlMessage);
+                            });
+        // console.log(users[0].users);
+        return res.status(200).json(users[0].users);
+    }
+    const [users] = await db.query(`select count(college_id) as users from educationaldetails where college_id = ?`,[college_id])
+                            .catch(err=>{
+                                return res.status(400).json(err.sqlMessage);
+                            });
+    // console.log(users[0].users);
+    return res.status(200).json(users[0].users);
+})
+
 const addjobroles = asyncHandler(async(req,res)=>{
     const jobroles = req.body;
     if(jobroles.length==0){
@@ -469,5 +490,6 @@ module.exports = {
     adminLogin,
     addColleges,
     getColleges,
-    updateStats
+    updateStats,
+    getUsersOfACollege
 }
