@@ -26,5 +26,6 @@ router.post('/addMeetupWinner',adminController.addMeetupWinner);
 router.get('/getColleges',adminController.getColleges);
 router.post('/updateStats',adminController.updateStats);
 router.get('/getUsersOfACollege/:college_id',adminController.getUsersOfACollege);
+router.post('/changeUserStatus',adminController.changeUserStatus);
 
 module.exports = router;
