@@ -673,6 +673,29 @@ const verifymail = asyncHandler(async(req,res)=>{
     return res.status(200).json({message:"success"});
 });
 
+const appliedToAJob = asyncHandler(async(req,res)=>{
+    const applied = req.body;
+    console.log(applied);
+    if(!applied){
+        return res.status(400).json({message:"no data"});
+    }
+
+    const [duplicate] = await db.query(`select user_id, job_id from jobsapplied where user_id = ? && job_id = ?`,[applied.user_id,applied.job_id])
+                                .catch(err=>{
+                                    return res.status(400).json(err.sqlMessage);
+                                });
+    // console.log(duplicate[0]);
+    if(duplicate[0]){
+        return res.status(200).json({message:"already applied"});
+    }
+
+    const [apply] = await db.query(`insert into jobsapplied set ?`,[applied])
+                            .catch(err=>{
+                                return res.status(400).json(err.sqlMessage);
+                            });
+    return res.status(200).json({message:"applied"});
+})
+
 module.exports = {
     userRegistration,
     selectPreferredRoles,
@@ -691,5 +714,6 @@ module.exports = {
     getAllJobRoles,
     resetPassword,
     verifymail,
-    editWorkExp
+    editWorkExp,
+    appliedToAJob
 }

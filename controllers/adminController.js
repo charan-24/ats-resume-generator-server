@@ -92,6 +92,12 @@ const getAdminOverview = asyncHandler(async(req,res)=>{
                                     });
     adminoverview["resumereqs"] = resumereqs;
 
+    const [jobsapplied] = await db.query(`select ja.*, ue.college_id from jobsapplied ja join educationaldetails ue on ja.user_id = ue.user_id`)
+                                    .catch(err=>{
+                                        return res.status(400).json(err.sqlMessage);
+                                    })
+    adminoverview["jobsapplied"] = jobsapplied;
+
     return res.status(200).json(adminoverview);
 });
 
@@ -108,6 +114,7 @@ const getUsers = asyncHandler(async (req, res) => {
 
 const getUsersOfACollege = asyncHandler(async(req,res)=>{
     const {college_id} = req.params;
+    // console.log(college_id);
     if(!college_id){
         return res.status(400).json({message:"no collegeid"});
     }
@@ -126,6 +133,19 @@ const getUsersOfACollege = asyncHandler(async(req,res)=>{
     // console.log(users[0].users);
     return res.status(200).json(users[0].users);
 })
+const getApplFromACollege = asyncHandler(async(req,res)=>{
+    const {college_id} = req.params;
+    // console.log(college_id);
+    if(!college_id){
+        return res.status(400).json({message:"no collegeid"});
+    }
+    const [applications] = await db.query(`select count(ja.applied_id) as applications from jobsapplied ja join educationaldetails ue on ja.user_id = ue.user_id where college_id = ?`,[college_id])
+                            .catch(err=>{
+                                return res.status(400).json(err.sqlMessage);
+                            });
+    // console.log(users[0].users);
+    return res.status(200).json(applications[0].applications);
+});
 
 const addjobroles = asyncHandler(async(req,res)=>{
     const jobroles = req.body;
@@ -494,7 +514,7 @@ const updateStats = asyncHandler(async(req,res)=>{
 
 const changeUserStatus = asyncHandler(async(req,res)=>{
     const {userid,role,status} = req.body;
-    console.log(req.body);
+    // console.log(req.body);
     if(!userid || !status || !role){
         return res.status(400).json({message:"no content"});
     }
@@ -548,5 +568,6 @@ module.exports = {
     getColleges,
     updateStats,
     getUsersOfACollege,
-    changeUserStatus
+    changeUserStatus,
+    getApplFromACollege
 }

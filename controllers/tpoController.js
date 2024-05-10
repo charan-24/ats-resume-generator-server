@@ -11,7 +11,7 @@ const tpoLogin = asyncHandler(async(req,res)=>{
         return res.status(400).json({message:"all fields required"});
     }
 
-    const [foundtpo] = await db.query('select tpo_id, password, emailorg, role from tpoaccounts where emailorg = ?',[emailorg])
+    const [foundtpo] = await db.query('select * from tpoaccounts where emailorg = ?',[emailorg])
                                 .catch(err=>{
                                     return res.status(400).json({message:err.sqlMessage});
                                 });
@@ -34,7 +34,7 @@ const tpoLogin = asyncHandler(async(req,res)=>{
         );
         const addrefreshtoken = await db.query(`update tpoaccounts set ? where tpo_id = ?`,[{lastlogin:logindate[0].logindate,"refreshToken":refreshToken},foundtpo[0].tpo_id]);
         res.cookie('jwt', refreshToken, { httpOnly: true, maxAge: 2 * 24 * 60 * 60 * 1000});
-        return res.status(200).json({message:"success",accessToken,"userid":foundtpo[0].tpo_id,"role":foundtpo[0].role});
+        return res.status(200).json({message:"success",accessToken,"userid":foundtpo[0].tpo_id,"role":foundtpo[0].role,"collegeid":foundtpo[0].college_id});
     }
     
     return res.status(401).json({message:"wrongpwd"});
@@ -68,7 +68,23 @@ const tpoRegister = asyncHandler(async(req,res)=>{
     return res.status(200).json({message:"tpo created","userid":register.insertId});
 });
 
+const getResumesOfCollege = asyncHandler(async(req,res)=>{
+    const {college_id} = req.params;
+    console.log(college_id);
+    if(!college_id){
+        return res.status(400).json({message:"no college id"});
+    }
+
+    const [resumes] = await db.query(`select count(ur.resume_id) as resumes from userresumes ur join educationaldetails ed on ur.user_id = ed.user_id where ed.college_id = ?`,[college_id])
+                                .catch(err=>{
+                                    return res.status(400).json(err.sqlMessage);
+                                });
+    return res.status(200).json(resumes[0].resumes);
+
+})
+
 module.exports = {
     tpoLogin,
-    tpoRegister
+    tpoRegister,
+    getResumesOfCollege
 }
