@@ -343,9 +343,9 @@ const userLogin = asyncHandler(async(req,res)=>{
     if(!password){
         return res.status(400).json({message:"password required"})        
     }
-    const [foundUser] = await db.query(`select user_id, password, username, role, subscribed from useraccounts where username = ? || email = ?`,[username,username]);
+    const [foundUser] = await db.query(`select user_id, password, username, role, subscribed, isActive from useraccounts where username = ? || email = ?`,[username,username]);
     // console.log(foundUser[0]);
-    if(!foundUser[0] || !Object.keys(foundUser[0]).length || !foundUser[0].subscribed){
+    if(!foundUser[0] || !Object.keys(foundUser[0]).length || !foundUser[0].subscribed || !foundUser[0].isActive){
         return res.status(401).json({message:"user not found"});
     }
     const match = await bcrypt.compare(password,foundUser[0].password);

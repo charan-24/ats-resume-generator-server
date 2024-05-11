@@ -232,30 +232,38 @@ const addBulkJobs = asyncHandler(async(req,res)=>{
 });
 
 const editJob = asyncHandler(async(req,res)=>{
-    const {job_id,changedjob} = req.body;
+    let {job_id,changedjob} = req.body;
+    // console.log(req.body);
+    changedjob = JSON.parse(changedjob);
+    // console.log(changedjob);
     if(!job_id || !changedjob || !Object.keys(changedjob).length){
         return res.status(400).json({message:"empty data provided"});
     }
-
-    const editjob = await db.query(`update jobslisted set ? where job_id = ?`,[changedjob,job_id])
-                            .catch(err=>{
-                                return res.status(401).json({message:err.sqlMessage});
-                            });
-    return res.status(200).json({message:"job edited"});
+    try{
+        await db.query(`update jobslisted set ? where job_id = ?`,[changedjob,job_id]);
+        return res.status(200).json("job edited");
+    }
+    catch (error) {
+        console.error(error);
+        return res.status(500).json("Internal server error");
+    } 
 });
 
 const deleteJob = asyncHandler (async (req,res)=>{
-    const {job_id, job_title} = req.body;
-    if(!job_id || !job_title){
+    const {jobId} = req.params;
+    if(!jobId){
         return res.status(401).json({message:"all fields required"});
     }
 
-    const sql = `delete from jobslisted where job_id = ? and title = ?;`;
-    const result = await db.query(sql,[job_id,job_title])
-                            .catch(err=>{
-                                return res.status(400).json({message:err.sqlMessage});
-                            });
-    return res.status(200).json({message:"job deleted"});
+    const sql = `delete from jobslisted where job_id = ?`;
+    try{
+        await db.query(sql,[jobId]);
+        return res.status(200).json({message:"job deleted"});
+    }
+    catch (error) {
+        console.error(error);
+        return res.status(500).json("Internal server error");
+    }
 });
 
 //delete a user

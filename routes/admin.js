@@ -14,7 +14,7 @@ router.get('/getAllJobs',adminController.getAllJobs);
 router.post('/addAJob',adminController.addAJob);
 router.post('/addBulkJobs',adminController.addBulkJobs);
 router.post('/editJob',adminController.editJob);
-router.delete('/deleteJob',adminController.deleteJob);
+router.delete('/deleteJob/:jobId',adminController.deleteJob);
 router.delete('/deleteUser',adminController.deleteUser);
 router.post('/addHackathon',adminController.addHackathon);
 router.post('/addContest',adminController.addContest);

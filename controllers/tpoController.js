@@ -70,7 +70,7 @@ const tpoRegister = asyncHandler(async(req,res)=>{
 
 const getResumesOfCollege = asyncHandler(async(req,res)=>{
     const {college_id} = req.params;
-    console.log(college_id);
+    // console.log(college_id);
     if(!college_id){
         return res.status(400).json({message:"no college id"});
     }
