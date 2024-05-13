@@ -1,5 +1,7 @@
 const asyncHandler = require('express-async-handler');
 const db = require('../database/database');
+const axios = require('axios');
+const SERVER = process.env.SERVER;
 
 const submitFeedback = asyncHandler(async(req,res)=>{
     const {user_id,fullname,email,category,subject,description,urgency,contact_method} = req.body;
@@ -20,6 +22,14 @@ const submitFeedback = asyncHandler(async(req,res)=>{
                                 .catch(err=>{
                                     return res.status(400).json({message:err.sqlMessage})
                                 });
+    await axios.post(`${SERVER}/portal/sendFeedbackMail`,{"name":feedbackobj.fullname,"email":feedbackobj.email})
+                .then(res=>{
+                    console.log(res.data);
+                })
+                .catch(err=>{
+                    console.log(err);
+                });
+
     return res.status(200).json({message:"feedback submitted"});
 });
 

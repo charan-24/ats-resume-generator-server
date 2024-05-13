@@ -554,6 +554,10 @@ const resetPassword = asyncHandler(async(req,res)=>{
         return res.status(400).json({message:"no user found"});
     }
     else if(user[0]){
+        if(!user[0].resetToken){
+            console.log("token expired")
+            return res.status(400).json({message:"token expired"});
+        }
         const match = await bcrypt.compare(reset.token, user[0].resetToken);
         if(match){
             const hashpwd = await bcrypt.hash(reset.password,parseInt(saltRounds));
@@ -566,8 +570,15 @@ const resetPassword = asyncHandler(async(req,res)=>{
             return res.status(401).json({message:"unauthorized password reset, try again"})
         }
         console.log("password updated");
+        await db.query(`update useraccounts set resetToken = NULL`)
+                .catch(err=>{
+                    return res.status(400).json(err.sqlMessage)
+                });
     }
     else if(hr[0]){
+        if(!hr[0].resetToken){
+            return res.status(400).json({message:"token expired"});
+        }
         const match = await bcrypt.compare(reset.token, hr[0].resetToken);
         if(match){
             const hashpwd = await bcrypt.hash(reset.password,parseInt(saltRounds));
@@ -580,9 +591,16 @@ const resetPassword = asyncHandler(async(req,res)=>{
             return res.status(401).json({message:"unauthorized password reset, try again"})
         }
         console.log("password updated");
+        await db.query(`update hraccounts set resetToken = NULL`)
+                .catch(err=>{
+                    return res.status(400).json(err.sqlMessage)
+                });
 
     }
     else if(tpo[0]){
+        if(!tpo[0].resetToken){
+            return res.status(400).json({message:"token expired"});
+        }
         const match = await bcrypt.compare(reset.token, tpo[0].resetToken);
         if(match){
             const hashpwd = await bcrypt.hash(reset.password,parseInt(saltRounds));
@@ -595,10 +613,13 @@ const resetPassword = asyncHandler(async(req,res)=>{
             return res.status(401).json({message:"unauthorized password reset, try again"})
         }
         console.log("password updated");
+        await db.query(`update tpoaccounts set resetToken = NULL`)
+                .catch(err=>{
+                    return res.status(400).json(err.sqlMessage)
+                });
 
     }
     return res.status(200).json({message:"password resetted"});
-
 });
 
 const verifymail = asyncHandler(async(req,res)=>{

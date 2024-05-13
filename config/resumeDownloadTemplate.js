@@ -157,7 +157,7 @@ const updateTemplate = async () => {
 
                         Great news! Your professional resume is now ready to download.
                         
-                        Download Now: {{downloadLink}}
+                        Download Now at {{downloadLink}}
 
                         We're excited to see where this resume takes you. For tips on applying to jobs with your new resume, check out:{{resourceLink}}
                         

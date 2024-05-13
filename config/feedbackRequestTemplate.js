@@ -17,7 +17,7 @@ const updateTemplate = async () => {
     Template: {
       // Template
       TemplateName: "FeedbackRequestMailTemplate", // required
-      SubjectPart: `We'd Love Your Feedback, {{name}}!`,
+      SubjectPart: `Thanks for your feedback, {{name}}!`,
       HtmlPart: `<html>
       <head>
           <style>
@@ -103,10 +103,9 @@ const updateTemplate = async () => {
                   </div>
               </div>
               <div class="mail-content">
-              <p>Hello {{name}}, </p>
-              <p>We hope you're enjoying Jacinth Paul Academy. Could you spare a few moments to share your experience with us?</p>
-              <p>Your feedback helps us improve <a href="{{feedbackFormLink}}">Feedback Form</p>
-              <p>Thank you for your support!</p>
+              <p>Dear {{name}}, </p>
+              <p>Thank you for sharing your thoughts with us. We truly appreciate your feedback and are currently reviewing the details you provided. We will follow up with you soon to discuss a resolution.</p>
+              <p>Thank you once again for helping us improve our services</p>
               <br />
               <p>Warmly,<br>The Jacinth Paul Academy Team</p>
                 </div>
@@ -128,18 +127,14 @@ const updateTemplate = async () => {
       </body>
       </html>
       `,
-      TextPart: `Hello {{name}},
+      TextPart: `Dear {{name}},
 
-                        We hope you're enjoying Jacinth Paul Academy. Could you spare a few moments to share your experience with us?
+      Thank you for sharing your thoughts with us. We truly appreciate your feedback and are currently reviewing the details you provided. We will follow up with you soon to discuss a resolution.
 
-                        
-                        Your feedback helps us improve {{feedbackFormLink}}
+      Thank you once again for helping us improve our services.
 
-                        
-                        Thank you for your support!
-
-                        Warmly,
-                        The Jacinth Paul Academy Team`,
+      Warmly,
+      The Jacinth Paul Academy Team`,
     },
   };
 

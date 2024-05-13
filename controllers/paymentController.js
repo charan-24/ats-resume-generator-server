@@ -3,6 +3,8 @@ const db = require('../database/database');
 const asyncHandler = require('express-async-handler');
 const crypto = require('crypto');
 const Razorpay = require('razorpay');
+const axios = require('axios');
+const SERVER = process.env.SERVER;
 
 const createOrder = asyncHandler(async(req,res)=>{
     const {username,amount} = req.body;
@@ -36,6 +38,8 @@ const createOrder = asyncHandler(async(req,res)=>{
 
 const validatePayment = asyncHandler(async(req,res)=>{
     const razorpaydetails = req.body;
+    let fullname = razorpaydetails.fullname;
+    let email = razorpaydetails.email;
     // console.log(razorpaydetails);
     if(!razorpaydetails || !Object.keys(razorpaydetails).length){
         return res.status(400).json({message:"empty data provided"});
@@ -69,6 +73,35 @@ const validatePayment = asyncHandler(async(req,res)=>{
                             return res.status(400).json({message: err.sqlMessage});
                           });
     const paid = await db.query('update useraccounts set ? where user_id = ?',[{subscribed:true,resumesplan:10},user_id]);
+    let startDate = subobj.startdate + '';
+    startDate = startDate.slice(4, 15);
+    let endDate = subobj.enddate+'';
+    endDate = endDate.slice(4, 15);
+    let postData = {
+        "name":fullname,
+        "email":email,
+        "paymentAmount": subobj.amount,
+        "subscriptionPlan":"Annual",
+        "startDate":startDate,
+        "expiryDate":endDate,
+        "dashboard":"https://education.jacinthpaul.com/app/overview.php",
+        "support":"education@jacinthpaul.com"
+    }
+    axios.post(`${SERVER}/portal/sendPaymentConfirmMail`,postData)
+                    .then(res=>{
+                        console.log(res.data);
+                    })
+                    .catch(err=>{
+                        console.log(err);
+                    });
+
+    axios.post(`${SERVER}/portal/sendWelcomeMail`,{"name":fullname})
+                    .then(res=>{
+                        console.log(res.data);
+                    })
+                    .catch(err=>{
+                        console.log(err);
+                    });
 
     return res.status(200).json({message:"success"});   
 });

@@ -25,6 +25,8 @@ const openai = new OpenAI({
 
 const generateResume = asyncHandler(async (req, res) => {
   let resumereq = req.body;
+  let userId = resumereq.user_id;
+
   console.log(resumereq);
   resumereq.projects = JSON.parse(resumereq.projects);
   resumereq.certificates = JSON.parse(resumereq.certificates);
@@ -33,6 +35,20 @@ const generateResume = asyncHandler(async (req, res) => {
   if (!resumereq || !Object.keys(resumereq).length) {
     return res.status(401).json({ message: "empty data received" });
   }
+
+  const [maildata] = await db.query(`select firstname,email from userdetails where user_id = ?`,[userId])
+                          .catch(err=>{
+                            return res.status(400).json(err.sqlMessage);
+                          });
+  maildata[0].email = "saicharan@jacinthpaul.com"
+
+  await axios.post(`${SERVER}/portal/sendResumeRequestMail`,{"name":maildata[0].firstname,"email":maildata[0].email})
+          .then(res=>{
+              console.log(res.data);
+          })
+          .catch(err=>{
+              console.log(err);
+          }); 
 
   const [jobrole] = await db.query(
       `select jobrole_name, jobrole_description from jobroles where jobrole_id`,
@@ -159,6 +175,8 @@ const generateResume = asyncHandler(async (req, res) => {
       SERVER+"/resume/jsonToPdf/",
       {
         userid: resumereq.user_id,
+        firstname: maildata[0].firstname,
+        email: maildata[0].email,
         resumename,
         userdetails,
         workexp,
@@ -186,6 +204,8 @@ const generateResume = asyncHandler(async (req, res) => {
 const jsonToPdf = asyncHandler(async (req, res) => {
   const jsondata = req.body;
   const user_id = jsondata.userid;
+  const firstname = jsondata.firstname;
+  const email = jsondata.email;
   console.log(jsondata);
   const resumeContent = {
     Name:
@@ -538,6 +558,15 @@ const jsonToPdf = asyncHandler(async (req, res) => {
               return res.status(400).json(err.sqlMessage);
       }); 
     console.log("db updated");
+
+    await axios.post(`${SERVER}/portal/sendResumeDownloadMail`,{"name":firstname,"email":email})
+          .then(res=>{
+              console.log(res.data);
+          })
+          .catch(err=>{
+              console.log(err);
+          });
+
   });
 
   doc.end();

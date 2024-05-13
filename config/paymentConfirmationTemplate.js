@@ -1,10 +1,12 @@
+require('dotenv').config();
 const { SESClient, UpdateTemplateCommand } = require("@aws-sdk/client-ses");
-require("dotenv").config();
 
 const accessKeyId = process.env.AWS_ACCESS_KEYID;
 const secretKey = process.env.AWS_SECRET_KEY;
 const regionName = process.env.S3_REGION;
+const port = process.env.PORT;
 
+console.log(regionName);
 const client = new SESClient({
   region: regionName,
   credentials: {
@@ -126,19 +128,10 @@ const updateTemplate = async () => {
                 <p>Best Regards,<br />The Jacinth Paul Academy Team</p>
             </div>
             <div class="footer">
-            <a href="https://education.jacinthpaul.com/privacy-policy/"
-          >Privacy Policy</a
-        >
-        <br />
-        <a href="https://education.jacinthpaul.com/terms-and-conditions/"
-          >Terms & Conditions</a
-        >
-        <br />
-        <a
-          href="https://education.jacinthpaul.com/cancellation-and-refund-policy/"
-          >Cancellation & Refund Policy</a
-        >
-      </div>
+              <a href="https://education.jacinthpaul.com/privacy-policy/">Privacy Policy</a><br />
+              <a href="https://education.jacinthpaul.com/terms-and-conditions/">Terms & Conditions</a><br />
+              <a href="https://education.jacinthpaul.com/cancellation-and-refund-policy/">Cancellation & Refund Policy</a>
+            </div>
           </div>
       </body>
       </html>

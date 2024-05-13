@@ -80,6 +80,56 @@ const getEventStats = asyncHandler(async(req,res)=>{
                             });
     // console.log(stats);
     return  res.status(400).json(stats[0]);
+});
+
+const editEvent = asyncHandler(async(req,res)=>{
+    let {eventId,event} = req.body;
+    event = JSON.parse(event);
+    console.log(eventId,event);
+    if(!eventId || !event || !Object.keys(event)){
+        return res.status(400).json("no data");
+    };
+    try{
+        if(event.type=="hackathon"){
+            await db.query(`update hackathons set ? where hackathon_id = ?`,[event,eventId])
+        }
+        else if(event.type=="contest"){
+            await db.query(`update codingcontests set ? where contest_id = ?`,[event,eventId])
+        }
+        else if(event.type=="meet-up"){
+            await db.query(`update codingmeetups set ? where meetup_id = ?`,[event,eventId])
+        }
+        return res.status(200).json(`${event.type} edited`)
+    }
+    catch(error){
+        console.error(error);
+        return res.status(500).json("Internal server error");
+    }
+});
+
+const deleteEvent = asyncHandler(async(req,res)=>{
+    const {eventId, type} = req.params;
+    console.log(req.params);
+    if(!eventId || !type){
+        return res.status(400).json("no data");
+    }
+
+    try{
+        if(type=="hackathon"){
+            await db.query(`delete from hackathons where hackathon_id = ?`,[eventId]);
+        }
+        else if(type=="contest"){
+            await db.query(`delete from codingcontests where contest_id = ?`,[eventId])
+        }
+        else if(type=="meet-up"){
+            await db.query(`delete from codingmeetups where meetup_id = ?`,[eventId])
+        }
+        return res.status(200).json(`${type} deleted`) 
+    }
+    catch(error){
+        console.error(error);
+        return res.status(500).json("Internal server error");
+    }
 })
 
 module.exports = {
@@ -92,6 +142,8 @@ module.exports = {
     getHackathonWinners,
     getContestWinners,
     getMeetupWinners,
-    getEventStats
+    getEventStats,
+    editEvent,
+    deleteEvent
 }
 

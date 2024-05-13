@@ -104,7 +104,7 @@ const updateTemplate = async () => {
               <div class="mail-content">
               <p>Hello {{name}}, </p>
               <p>Your request for an ATS-friendly resume has been received!</p>
-              <p>Expected delivery is within 3 hours, and we'll notify you the moment it's ready for download.</p>
+              <p>Expected delivery is within 1 hour, and we'll notify you the moment it's ready for download.</p>
               <p>To review your request or make changes, visit <a href="{{resumeRequestLink}}">{{resumeRequestLink}}</a></p>
               <p>Thank you for using Jacinth Paul Academy for your career advancement.</p>
               <br />
@@ -129,10 +129,9 @@ const updateTemplate = async () => {
       </html>
       `,
       TextPart: `Hello {{name}},
-
                         Your request for an ATS-friendly resume has been received!
                         
-                        Expected delivery is within 3 hours, and we'll notify you the moment it's ready for download.
+                        Expected delivery is within 1 hour, and we'll notify you the moment it's ready for download.
 
                         To review your request or make changes, visit {{resumeRequestLink}}
                         

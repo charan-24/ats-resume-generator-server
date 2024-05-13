@@ -12,5 +12,7 @@ router.get('/getHackathonWinners',eventsController.getHackathonWinners);
 router.get('/getContestWinners',eventsController.getContestWinners);
 router.get('/getMeetupWinners',eventsController.getMeetupWinners);
 router.get('/getEventStats',eventsController.getEventStats);
+router.post('/editEvent',eventsController.editEvent);
+router.delete('/deleteEvent/:type/:eventId',eventsController.deleteEvent);
 
 module.exports = router;
