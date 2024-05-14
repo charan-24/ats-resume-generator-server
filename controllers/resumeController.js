@@ -501,6 +501,7 @@ const jsonToPdf = asyncHandler(async (req, res) => {
   doc.on("data", function (chunk) {
     buffer.push(chunk);
   });
+  
   doc.on("end", async function () {
     const pdfBuffer = Buffer.concat(buffer);
     // Now you have the PDF buffer, you can do further processing, save it to a file, or send it over the network.

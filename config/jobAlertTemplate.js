@@ -103,10 +103,10 @@ const updateTemplate = async ()=>{
               </div>
               <div class="mail-content">
               <p>Dear {{name}}, </p>
-              <p>New job opportunities matching your profile are here: </p>
-              <p>{{jobListings}}</p>
+              <p>New job opportunities matching your profile are <a href={{jobsPageLink}}>here</a></p>
+              <br />
               <p>Don’t miss out! Apply today.<br />For more details and to apply, visit <a href="{{jobsPageLink}}">{{jobsPageLink}}</a></p>
-              <p>To adjust your job preferences, update your profile here <a href="{{profileLink}}">{{profileLink}}</a></p>
+              <p>To adjust your job preferences, update your profile <a href="{{jobsPageLink}}">here</a></p>
               <br />
               <p>Happy Job Hunting,<br>The Jacinth Paul Academy Team</p>
                 </div>
@@ -132,10 +132,10 @@ const updateTemplate = async ()=>{
 
                         New job opportunities matching your profile are here: 
                         
-                        {{jobListings}}
+                        {{jobsPageLink}}
                         Don’t miss out! Apply today. For more details and to apply, visit: {{jobsPageLink}}
                         
-                        To adjust your job preferences, update your profile here: {{profileLink}}
+                        To adjust your job preferences, update your profile here: {{jobsPageLink}}
                         
                         Happy Job Hunting,
                         The Jacinth Paul Academy Team`

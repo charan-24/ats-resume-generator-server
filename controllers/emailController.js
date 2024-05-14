@@ -1,4 +1,4 @@
-const {SESClient, SendTemplatedEmailCommand, SendEmailCommand} = require('@aws-sdk/client-ses');
+const {SESClient, SendTemplatedEmailCommand, SendBulkTemplatedEmailCommand} = require('@aws-sdk/client-ses');
 const db = require('../database/database');
 const asyncHandler = require('express-async-handler');
 require('dotenv').config();
@@ -22,8 +22,8 @@ const sendWelcomeMail = asyncHandler(async(req,res)=>{
         }
     });
 
-    const dashboard = "education.jacinthpaul.com";
-    const support = "support@jacinth.com";
+    const dashboard = "education.jacinthpaul.com/app/login.php";
+    const support = "support@jacinthpaul.com";
     const recipentMail = senderMail;
     const templateName = "WelcomeMailTemplate";
 
@@ -306,6 +306,36 @@ const sendFeedbackMail = asyncHandler(async(req,res)=>{
     return res.status(200).json("feedback ack mail sent");
 });
 
+const sendJobAlertMails = asyncHandler(async(req,res)=>{
+    // Define the email parameters
+    const mailData = req.body;
+    const client = new SESClient({
+        region: regionName,
+        credentials:{
+            accessKeyId: accessKeyId,
+            secretAccessKey: secretKey
+        }
+    });
+    const input = {
+        Source: senderMail,
+        Template: "JobAlertMailTemplate", // Name of the template
+        DefaultTemplateData: JSON.stringify({"name":"user","jobsPageLink":`${CLIENT}/all-job-opportunities.php`}),
+        Destinations: mailData,
+    };
+  
+  // Send the bulk templated 
+    try{
+        const sendCmd = new SendBulkTemplatedEmailCommand(input);
+        const response = await client.send(sendCmd);
+        console.log(response);
+    }
+    catch(err){
+        return res.status(400).json("error");
+    }
+    return res.status(200).json("jobalert mail sent");
+
+})
+
 
 module.exports = {
     sendWelcomeMail,
@@ -314,5 +344,6 @@ module.exports = {
     sendPaymentConfirmMail,
     sendResumeRequestMail,
     sendResumeDownloadMail,
-    sendFeedbackMail
+    sendFeedbackMail,
+    sendJobAlertMails
 }

@@ -2,7 +2,9 @@ const bcrypt = require('bcrypt');
 const db = require('../database/database');
 const jwt = require('jsonwebtoken');
 const asyncHandler = require('express-async-handler');
-
+const axios = require('axios');
+const SERVER = process.env.SERVER;
+const CLIENT = process.env.CLIENT;
 //get admin overview details
 const getAdminOverview = asyncHandler(async(req,res)=>{
 
@@ -201,13 +203,14 @@ const addAJob = asyncHandler(async(req,res)=>{
 
 const addBulkJobs = asyncHandler(async(req,res)=>{
     const bulkjobs = req.body;
-    // console.log(bulkjobs);
+    let newjobs = new Set();
     if(!bulkjobs || bulkjobs.length===0){
         return res.status(401).json({message:"jobs provided are empty"});
     }
 
     for(let i=0;i<bulkjobs.length;i++){
         const job = bulkjobs[i];
+        newjobs.add(job.jobrole_id);
         const jobobj = {
             "jobrole_id":job.jobrole_id,
             "title":job.title,
@@ -228,8 +231,68 @@ const addBulkJobs = asyncHandler(async(req,res)=>{
                                         return res.status(400).json({message:err.sqlMessage});
                                     });
     }
+    let allusers=[];
+    for(let item of newjobs){
+        const jobrole = item;
+        const [users] = await db.query(`select user_id from preferredjobroles where jobrole_id = ?`,[jobrole])
+                                .catch(err=>{
+                                    return res.status(400).json(err.sqlMessage);
+                                });
+        // console.log(users);
+        allusers.push(users)
+    }
+    // console.log(allusers);
+    await axios.post(`${SERVER}/admin/dataForJobAlert`,allusers)
+                .then(res=>{
+                    console.log(res.data);
+                })
+                .catch(err=>{
+                    console.log(err);
+                });
     return res.status(200).json({message:bulkjobs.length + ` new jobs are added`});
 });
+
+const dataForJobAlert = asyncHandler(async(req,res)=>{
+    const allusers = req.body;
+    console.log(allusers);
+    const unqusers = new Set();
+
+    for(let i=0;i<allusers.length;i++){
+        // console.log(allusers[i]);
+        for(let item of allusers[i]){
+            // const item = allusers[i][j];
+            // console.log(item);
+            unqusers.add(item.user_id);
+        }
+    }
+    console.log(unqusers);
+    let dest = [];
+    const jobsPageLink = `${CLIENT}/all-job-opportunities.php`;
+    for(let item of unqusers){
+        const [data] = await db.query(`select firstname as name, email from userdetails where user_id = ?`,[item])
+                                .catch(err=>{
+                                    return res.status(400).json(err.sqlMessage);
+                                });
+        const name = data[0].name;
+        const obj = {
+            Destination: {
+                ToAddresses: [data[0].email],
+            },
+            ReplacementTemplateData: JSON.stringify({"name":name,"jobsPageLink":jobsPageLink}),
+        }
+        console.log(obj.Destination.ToAddresses[0]);
+        dest.push(obj);
+    }
+    // console.log(dest);
+    await axios.post(`${SERVER}/portal/sendJobAlertMails`,dest)
+                .then(res=>{
+                    console.log(res.data);
+                })
+                .catch(err=>{
+                    console.log(err);
+                });
+    return res.status(200).json("bulk mail data done");
+})
 
 const editJob = asyncHandler(async(req,res)=>{
     let {job_id,changedjob} = req.body;
@@ -485,17 +548,20 @@ const adminLogin = asyncHandler(async(req,res)=>{
 });
 
 const addColleges = asyncHandler(async(req,res)=>{
-    const colleges = req.body;
+    let colleges = req.body;
+    console.log(colleges);
     if(colleges.length === 0){
         return res.status(204).json({message:"no colleges data"});
     }
     for(let i=0;i<colleges.length;i++){
         const college = colleges[i];
+        console.log(college);
         const addclg = await db.query(`insert into colleges set ?`,[college])
                                 .catch(err=>{
                                     return res.status(400).json(err.sqlMessage);
                                 });
     }
+    console.log("colleges added");
     return res.status(200).json("colleges added");
 });
 
@@ -577,5 +643,6 @@ module.exports = {
     updateStats,
     getUsersOfACollege,
     changeUserStatus,
-    getApplFromACollege
+    getApplFromACollege,
+    dataForJobAlert
 }

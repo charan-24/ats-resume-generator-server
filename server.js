@@ -15,7 +15,7 @@ app.use(exp.urlencoded({extended: false}));
 //database connection
 require('./database/database');
 
-// require('./config/feedbackRequestTemplate');
+// require('./config/jobAlertTemplate');
 
 //routes
 app.use('/user',require('./routes/user'));
