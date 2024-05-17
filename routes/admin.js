@@ -29,5 +29,9 @@ router.get('/getUsersOfACollege/:college_id',adminController.getUsersOfACollege)
 router.get('/getApplFromACollege/:college_id',adminController.getApplFromACollege);
 router.post('/changeUserStatus',adminController.changeUserStatus);
 router.post('/dataForJobAlert',adminController.dataForJobAlert);
+router.post('/addATraining',adminController.addATraining);
+router.post('/EditATraining',adminController.EditATraining);
+router.post('/addAWorkshop',adminController.addAWorkshop);
+router.post('/EditAWorkshop',adminController.EditAWorkshop);
 
 module.exports = router;

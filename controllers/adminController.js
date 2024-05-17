@@ -616,7 +616,74 @@ const changeUserStatus = asyncHandler(async(req,res)=>{
             });
     }
     return res.status(200).json({message:"status changed"});
-})
+});
+
+const addATraining = asyncHandler(async(req,res)=>{
+    const training = req.body;
+    if(!training || !Object.keys(training).length){
+        return res.status(400).json("no training data");
+    }
+
+    try{
+        await db.query(`insert into trainings set ?`,[training])
+        return res.status(200).json("training added");
+    }   
+    catch(error){
+        console.log(error);
+        return res.status(500).json(error);
+    }
+});
+
+const EditATraining = asyncHandler(async(req,res)=>{
+    let {training_id,training} = req.body;
+    training = JSON.parse(training);
+    console.log(training);
+    if(!training_id || !training || !Object.keys(training).length){
+        return res.status(400).json("no training data");
+    }
+
+    try{
+        await db.query(`update trainings set ? where training_id = ?`,[training,training_id])
+        return res.status(200).json(`training ${training_id} updated`);
+    }   
+    catch(error){
+        console.log(error);
+        return res.status(500).json(error);
+    }
+});
+const addAWorkshop = asyncHandler(async(req,res)=>{
+    const workshop = req.body;
+    if(!workshop || !Object.keys(workshop).length){
+        return res.status(400).json("no training data");
+    }
+
+    try{
+        await db.query(`insert into workshops set ?`,[workshop])
+        return res.status(200).json("workshop added");
+    }   
+    catch(error){
+        console.log(error);
+        return res.status(500).json(error);
+    }
+});
+
+const EditAWorkshop = asyncHandler(async(req,res)=>{
+    let {workshop_id,workshop} = req.body;
+    workshop = JSON.parse(workshop);
+    console.log(workshop);
+    if(!workshop_id || !workshop || !Object.keys(workshop).length){
+        return res.status(400).json("no training data");
+    }
+
+    try{
+        await db.query(`update workshops set ? where workshop_id = ?`,[workshop,workshop_id])
+        return res.status(200).json(`workshop ${workshop_id} updated`);
+    }   
+    catch(error){
+        console.log(error);
+        return res.status(500).json(error);
+    }
+});
 
 
 
@@ -644,5 +711,9 @@ module.exports = {
     getUsersOfACollege,
     changeUserStatus,
     getApplFromACollege,
-    dataForJobAlert
+    dataForJobAlert,
+    addATraining,
+    EditATraining,
+    addAWorkshop,
+    EditAWorkshop
 }
