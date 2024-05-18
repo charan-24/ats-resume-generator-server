@@ -685,6 +685,13 @@ const EditAWorkshop = asyncHandler(async(req,res)=>{
     }
 });
 
+const addACourse = asyncHandler(async(req,res)=>{
+    let course = req.body;
+    console.log(course);
+    console.log(req?.file);
+    return res.status(200).json("okay");
+})
+
 
 
 module.exports = {
@@ -715,5 +722,6 @@ module.exports = {
     addATraining,
     EditATraining,
     addAWorkshop,
-    EditAWorkshop
+    EditAWorkshop,
+    addACourse
 }

@@ -33,5 +33,6 @@ router.post('/addATraining',adminController.addATraining);
 router.post('/EditATraining',adminController.EditATraining);
 router.post('/addAWorkshop',adminController.addAWorkshop);
 router.post('/EditAWorkshop',adminController.EditAWorkshop);
+router.post('/addACourse',adminController.addACourse);
 
 module.exports = router;

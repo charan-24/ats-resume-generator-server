@@ -10,7 +10,6 @@ const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
 // const { Upload } = require("@aws-sdk/lib-storage");
 const crypto = require("crypto");
 
-
 const accessKeyId = process.env.AWS_ACCESS_KEYID;
 const secretKey = process.env.AWS_SECRET_KEY;
 const regionName = process.env.S3_REGION;
@@ -64,10 +63,9 @@ const uploadPfp = asyncHandler(async(req,res)=>{
         });
     }
     else{
-        await db.query(`update userpfps set ?`, {
-            "user_id": userid,
+        await db.query(`update userpfps set ? where user_id = ?`, [{
             "pfpawspath": filePath,
-          })
+          },userid])
           .catch((err) => {
             return res.status(400).json({ message: err.sqlMessage });
         });
