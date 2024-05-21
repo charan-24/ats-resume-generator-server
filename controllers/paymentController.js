@@ -40,6 +40,9 @@ const validatePayment = asyncHandler(async(req,res)=>{
     const razorpaydetails = req.body;
     let fullname = razorpaydetails.fullname;
     let email = razorpaydetails.email;
+    let type = razorpaydetails.type;
+    let eventId = razorpaydetails.eventId;
+    console.log(type,eventId);
     // console.log(razorpaydetails);
     if(!razorpaydetails || !Object.keys(razorpaydetails).length){
         return res.status(400).json({message:"empty data provided"});
@@ -68,40 +71,61 @@ const validatePayment = asyncHandler(async(req,res)=>{
         "resumesused":0
     }
     // console.log(subobj);
-    const subs = await db.query(`insert into subscriptions set ?`,subobj)
-                          .catch(err=>{
-                            return res.status(400).json({message: err.sqlMessage});
-                          });
-    const paid = await db.query('update useraccounts set ? where user_id = ?',[{subscribed:true,resumesplan:10},user_id]);
-    let startDate = subobj.startdate + '';
-    startDate = startDate.slice(4, 15);
-    let endDate = subobj.enddate+'';
-    endDate = endDate.slice(4, 15);
-    let postData = {
-        "name":fullname,
-        "email":email,
-        "paymentAmount": subobj.amount,
-        "subscriptionPlan":"Annual",
-        "startDate":startDate,
-        "expiryDate":endDate,
-        "dashboard":"https://education.jacinthpaul.com/app/overview.php",
-        "support":"education@jacinthpaul.com"
-    }
-    axios.post(`${SERVER}/portal/sendPaymentConfirmMail`,postData)
-                    .then(res=>{
-                        console.log(res.data);
-                    })
-                    .catch(err=>{
-                        console.log(err);
-                    });
+    if(type == 'annual'){
+        const subs = await db.query(`insert into subscriptions set ?`,subobj)
+                            .catch(err=>{
+                                return res.status(400).json({message: err.sqlMessage});
+                            });
+        const paid = await db.query('update useraccounts set ? where user_id = ?',[{subscribed:true,resumesplan:10},user_id]);
+        let startDate = subobj.startdate + '';
+        startDate = startDate.slice(4, 15);
+        let endDate = subobj.enddate+'';
+        endDate = endDate.slice(4, 15);
+        let postData = {
+            "name":fullname,
+            "email":email,
+            "paymentAmount": subobj.amount,
+            "subscriptionPlan":"Annual",
+            "startDate":startDate,
+            "expiryDate":endDate,
+            "dashboard":"https://education.jacinthpaul.com/app/overview.php",
+            "support":"education@jacinthpaul.com"
+        }
 
-    axios.post(`${SERVER}/portal/sendWelcomeMail`,{"name":fullname})
-                    .then(res=>{
-                        console.log(res.data);
-                    })
-                    .catch(err=>{
-                        console.log(err);
-                    });
+        axios.post(`${SERVER}/portal/sendPaymentConfirmMail`,postData)
+                        .then(res=>{
+                            console.log(res.data);
+                        })
+                        .catch(err=>{
+                            console.log(err);
+                        });
+
+        axios.post(`${SERVER}/portal/sendWelcomeMail`,{"name":fullname,"email":email})
+                        .then(res=>{
+                            console.log(res.data);
+                        })
+                        .catch(err=>{
+                            console.log(err);
+                        });
+    }
+    else if (type == 'hackathon' || type == 'contest'){
+        await db.query(`update eventsapplied set ? where user_id = ? and event_id = ? and type = ?`,[{payment:1},user_id,eventId,type])
+                .catch(err=>{
+                    return res.status(500).json({message: err.sqlMessage})
+                });
+    }
+    else if(type == 'meetup'){
+        await db.query(`update meetupsapplied set ? where user_id = ? and event_id = ? and type = ?`,[{payment:1},user_id,eventId,type])
+                .catch(err=>{
+                    return res.status(500).json({message: err.sqlMessage})
+                });
+    }
+    else if(type == 'training'){
+        await db.query(`insert into trainingsapplied set ?`,[{user_id:user_id,training_id:eventId,payment:1}])
+                .catch(err=>{
+                    return res.status(500).json({message: err.sqlMessage})
+                });
+    }
 
     return res.status(200).json({message:"success"});   
 });

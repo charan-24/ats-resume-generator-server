@@ -3,8 +3,20 @@ const db = require('../database/database');
 const jwt = require('jsonwebtoken');
 const asyncHandler = require('express-async-handler');
 const axios = require('axios');
+const {
+    S3Client,
+    PutObjectCommand,
+    GetObjectCommand,
+  } = require("@aws-sdk/client-s3");
+const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
+const crypto = require("crypto");
 const SERVER = process.env.SERVER;
 const CLIENT = process.env.CLIENT;
+const accessKeyId = process.env.AWS_ACCESS_KEYID;
+const secretKey = process.env.AWS_SECRET_KEY;
+const regionName = process.env.S3_REGION;
+const bucketName = process.env.S3_BUCKET;
+
 //get admin overview details
 const getAdminOverview = asyncHandler(async(req,res)=>{
 
@@ -102,6 +114,7 @@ const getAdminOverview = asyncHandler(async(req,res)=>{
 
     return res.status(200).json(adminoverview);
 });
+
 
 //getting userdetails from database
 const getUsers = asyncHandler(async (req, res) => {
@@ -683,13 +696,46 @@ const EditAWorkshop = asyncHandler(async(req,res)=>{
         console.log(error);
         return res.status(500).json(error);
     }
+    
 });
 
 const addACourse = asyncHandler(async(req,res)=>{
     let course = req.body;
-    console.log(course);
-    console.log(req?.file);
-    return res.status(200).json("okay");
+    // console.log(course);
+    // console.log(req?.file);
+    let imgBuffer = req.file.buffer;
+    const s3 = new S3Client({
+        region: regionName,
+        credentials: {
+          accessKeyId: accessKeyId,
+          secretAccessKey: secretKey,
+        },
+    });
+
+    const fileName = (bytes = 32) => crypto.randomBytes(bytes).toString("hex");
+    const filePath = `courseThumbnails/${fileName()}`;
+
+    const params = {
+      Bucket: bucketName,
+      Key: filePath,
+      Body: imgBuffer,
+      ContentType: req.file.mimetype,
+    };
+
+    try {
+        const command = new PutObjectCommand(params);
+        const response = await s3.send(command);
+        console.log("Object uploaded successfully:", response);
+    } catch (error) {
+        console.error("Error uploading object:", error);
+    }
+    course["thumbnailawspath"] = filePath;
+    // console.log(course);
+    await db.query(`insert into courses set ?`,[course])
+            .catch(err=>{
+                return res.status(500).json(err.sqlMessage);
+            });        
+    return res.status(200).json("course added");
 })
 
 

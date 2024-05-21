@@ -25,5 +25,6 @@ router.get('/getAllJobRoles',userController.getAllJobRoles);
 router.post('/resetPassword',userController.resetPassword);
 router.post('/verifymail',userController.verifymail);
 router.post('/appliedToAJob',userController.appliedToAJob);
+router.post('/eventRegistration',userController.eventRegistration);
 
 module.exports = router;

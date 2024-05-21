@@ -715,7 +715,28 @@ const appliedToAJob = asyncHandler(async(req,res)=>{
                                 return res.status(400).json(err.sqlMessage);
                             });
     return res.status(200).json({message:"applied"});
-})
+});
+
+const eventRegistration = asyncHandler(async(req,res)=>{
+    let regbody = req.body;
+    regbody = JSON.stringify(regbody);
+    regbody = JSON.parse(regbody);
+    console.log(regbody);
+    let type = regbody.type;
+    try{
+        if(type == 'hackathon' || type =='contest'){
+            await db.query(`insert into eventsapplied set ?`,[regbody])
+        }
+        else if(type =='meetup'){
+            await db.query(`insert into meetupsapplied set ?`,[regbody])
+        }
+    }
+    catch(error){
+        console.log(error);
+        return res.status(500).json(error);
+    }
+    return res.status(200).json("success");
+}); 
 
 module.exports = {
     userRegistration,
@@ -736,5 +757,6 @@ module.exports = {
     resetPassword,
     verifymail,
     editWorkExp,
-    appliedToAJob
+    appliedToAJob,
+    eventRegistration
 }

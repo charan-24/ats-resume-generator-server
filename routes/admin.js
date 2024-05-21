@@ -2,6 +2,11 @@ const exp = require('express');
 const router = exp.Router();
 const adminController = require('../controllers/adminController');
 const verifyJWT = require('../middlewares/verifyJWT');
+const multer  = require('multer');
+const storage = multer.memoryStorage()
+const upload = multer({ storage: storage })
+
+
 
 router.post('/adminRegister',adminController.adminRegister);
 router.post('/adminLogin',adminController.adminLogin);
@@ -33,6 +38,6 @@ router.post('/addATraining',adminController.addATraining);
 router.post('/EditATraining',adminController.EditATraining);
 router.post('/addAWorkshop',adminController.addAWorkshop);
 router.post('/EditAWorkshop',adminController.EditAWorkshop);
-router.post('/addACourse',adminController.addACourse);
+router.post('/addACourse',upload.single('thumbnail'),adminController.addACourse);
 
 module.exports = router;

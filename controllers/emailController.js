@@ -13,7 +13,7 @@ const regionName = process.env.S3_REGION;
 const senderMail = process.env.SENDER_MAIL;
 
 const sendWelcomeMail = asyncHandler(async(req,res)=>{
-    const {name} = req.body;
+    const {name,email} = req.body;
     const client = new SESClient({
         region: regionName,
         credentials:{
@@ -24,7 +24,7 @@ const sendWelcomeMail = asyncHandler(async(req,res)=>{
 
     const dashboard = "education.jacinthpaul.com/app/login.php";
     const support = "support@jacinthpaul.com";
-    const recipentMail = senderMail;
+    const recipentMail = email;
     const templateName = "WelcomeMailTemplate";
 
     console.log(recipentMail)

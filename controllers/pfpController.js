@@ -1,13 +1,11 @@
 const db = require('../database/database');
 const asyncHandler = require('express-async-handler');
-
 const {
     S3Client,
     PutObjectCommand,
     GetObjectCommand,
   } = require("@aws-sdk/client-s3");
 const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
-// const { Upload } = require("@aws-sdk/lib-storage");
 const crypto = require("crypto");
 
 const accessKeyId = process.env.AWS_ACCESS_KEYID;

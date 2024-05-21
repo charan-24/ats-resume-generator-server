@@ -40,7 +40,7 @@ const generateResume = asyncHandler(async (req, res) => {
                           .catch(err=>{
                             return res.status(400).json(err.sqlMessage);
                           });
-  maildata[0].email = "saicharan@jacinthpaul.com"
+  // maildata[0].email = "saicharan@jacinthpaul.com"
 
   await axios.post(`${SERVER}/portal/sendResumeRequestMail`,{"name":maildata[0].firstname,"email":maildata[0].email})
           .then(res=>{

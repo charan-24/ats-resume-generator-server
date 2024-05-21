@@ -29,6 +29,7 @@ app.use('/payment',require('./routes/payment'));
 app.use('/portal',require('./routes/portal'));
 app.use('/pfp',require('./routes/pfp'));
 app.use('/logout',require('./routes/logout'));
+app.use('/skills',require('./routes/skills'));
 
 app.listen(port,()=>{
     console.log(`server started on port ${port}`);
