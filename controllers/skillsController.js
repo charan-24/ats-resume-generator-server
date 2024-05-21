@@ -6,7 +6,9 @@ const getTrainings = asyncHandler(async(req,res)=>{
                                 .catch(err=>{
                                     return res.status(500).json(err.sqlMessage);
                                 });
-    return res.status(200).json(trainings);
+    const skills = {};
+    skills["trainings"] = trainings
+    return res.status(200).json(skills);
 });
 
 const getCourses = asyncHandler(async(req,res)=>{
@@ -14,7 +16,9 @@ const getCourses = asyncHandler(async(req,res)=>{
                                 .catch(err=>{
                                     return res.status(500).json(err.sqlMessage);
                                 });
-    return res.status(200).json(courses);
+    const skills = {};
+    skills["courses"] = courses
+    return res.status(200).json(skills);
 });
 
 module.exports = {
