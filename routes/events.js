@@ -14,5 +14,7 @@ router.get('/getMeetupWinners',eventsController.getMeetupWinners);
 router.get('/getEventStats',eventsController.getEventStats);
 router.post('/editEvent',eventsController.editEvent);
 router.delete('/deleteEvent/:type/:eventId',eventsController.deleteEvent);
+router.get('/getEventsRegisteredUsers',eventsController.getEventsRegisteredUsers);
+
 
 module.exports = router;

@@ -35,9 +35,7 @@ router.get('/getApplFromACollege/:college_id',adminController.getApplFromAColleg
 router.post('/changeUserStatus',adminController.changeUserStatus);
 router.post('/dataForJobAlert',adminController.dataForJobAlert);
 router.post('/addATraining',adminController.addATraining);
-router.post('/EditATraining',adminController.EditATraining);
 router.post('/addAWorkshop',adminController.addAWorkshop);
-router.post('/EditAWorkshop',adminController.EditAWorkshop);
 router.post('/addACourse',upload.single('thumbnail'),adminController.addACourse);
 
 module.exports = router;

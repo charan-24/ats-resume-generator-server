@@ -647,23 +647,7 @@ const addATraining = asyncHandler(async(req,res)=>{
     }
 });
 
-const EditATraining = asyncHandler(async(req,res)=>{
-    let {training_id,training} = req.body;
-    training = JSON.parse(training);
-    console.log(training);
-    if(!training_id || !training || !Object.keys(training).length){
-        return res.status(400).json("no training data");
-    }
 
-    try{
-        await db.query(`update trainings set ? where training_id = ?`,[training,training_id])
-        return res.status(200).json(`training ${training_id} updated`);
-    }   
-    catch(error){
-        console.log(error);
-        return res.status(500).json(error);
-    }
-});
 const addAWorkshop = asyncHandler(async(req,res)=>{
     const workshop = req.body;
     if(!workshop || !Object.keys(workshop).length){
@@ -678,25 +662,6 @@ const addAWorkshop = asyncHandler(async(req,res)=>{
         console.log(error);
         return res.status(500).json(error);
     }
-});
-
-const EditAWorkshop = asyncHandler(async(req,res)=>{
-    let {workshop_id,workshop} = req.body;
-    workshop = JSON.parse(workshop);
-    console.log(workshop);
-    if(!workshop_id || !workshop || !Object.keys(workshop).length){
-        return res.status(400).json("no training data");
-    }
-
-    try{
-        await db.query(`update workshops set ? where workshop_id = ?`,[workshop,workshop_id])
-        return res.status(200).json(`workshop ${workshop_id} updated`);
-    }   
-    catch(error){
-        console.log(error);
-        return res.status(500).json(error);
-    }
-    
 });
 
 const addACourse = asyncHandler(async(req,res)=>{
@@ -766,8 +731,6 @@ module.exports = {
     getApplFromACollege,
     dataForJobAlert,
     addATraining,
-    EditATraining,
     addAWorkshop,
-    EditAWorkshop,
     addACourse
 }

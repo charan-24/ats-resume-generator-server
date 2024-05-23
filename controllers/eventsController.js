@@ -130,7 +130,38 @@ const deleteEvent = asyncHandler(async(req,res)=>{
         console.error(error);
         return res.status(500).json("Internal server error");
     }
-})
+});
+
+const getEventsRegisteredUsers = asyncHandler(async(req,res)=>{
+    const registered = {};
+    const [hackathons] = await db.query(`select ea.*, e.title, e.registrationfee, u.username, u.firstname, u.lastname from eventsapplied ea
+                                        join hackathons e on ea.event_id = e.hackathon_id
+                                        join userdetails u on ea.user_id = u.user_id
+                                        where ea.type = ?`,['hackathon'])
+                                    .catch(err=>{
+                                        return res.status(400).json(err.sqlMessage);
+                                    });
+    registered["hackathons"] = hackathons;
+
+    const [contests] = await db.query(`select ea.*, e.title, e.registrationfee, u.username, u.firstname, u.lastname from eventsapplied ea
+                                        join codingcontests e on ea.event_id = e.contest_id
+                                        join userdetails u on ea.user_id = u.user_id
+                                        where ea.type = ?`,['contest'])
+                                    .catch(err=>{
+                                        return res.status(400).json(err.sqlMessage);
+                                    });
+    registered["contests"] = contests;
+
+    const [meetups] = await db.query(`select ea.*, e.title, e.registrationfee, u.username, u.firstname, u.lastname from meetupsapplied ea
+                                        join codingmeetups e on ea.event_id = e.meetup_id
+                                        join userdetails u on ea.user_id = u.user_id`)
+                                    .catch(err=>{
+                                        return res.status(400).json(err.sqlMessage);
+                                    });
+    registered["meetups"] = meetups;
+
+    return res.status(200).json(registered);
+});
 
 module.exports = {
     getUpComingHackathons,
@@ -144,6 +175,7 @@ module.exports = {
     getMeetupWinners,
     getEventStats,
     editEvent,
-    deleteEvent
+    deleteEvent,
+    getEventsRegisteredUsers
 }
 
