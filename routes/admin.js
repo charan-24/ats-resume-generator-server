@@ -17,7 +17,7 @@ router.get('/getUsers',adminController.getUsers);
 // router.post('/addjobroles',adminController.addjobroles);
 router.get('/getAllJobs',adminController.getAllJobs);
 router.post('/addAJob',adminController.addAJob);
-router.post('/addBulkJobs',adminController.addBulkJobs);
+router.post('/addBulkJobs',upload.single('bulkUploadSheet'),adminController.addBulkJobs);
 router.post('/editJob',adminController.editJob);
 router.delete('/deleteJob/:jobId',adminController.deleteJob);
 router.delete('/deleteUser',adminController.deleteUser);

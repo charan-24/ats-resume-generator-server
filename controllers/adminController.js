@@ -3,6 +3,7 @@ const db = require('../database/database');
 const jwt = require('jsonwebtoken');
 const asyncHandler = require('express-async-handler');
 const axios = require('axios');
+const XLSX = require('xlsx');
 const {
     S3Client,
     PutObjectCommand,
@@ -215,17 +216,32 @@ const addAJob = asyncHandler(async(req,res)=>{
 });
 
 const addBulkJobs = asyncHandler(async(req,res)=>{
-    const bulkjobs = req.body;
+    let bulkjobs = req.body;
+    const buffer = req?.file?.buffer;
+    // console.log(buffer);
+    const workbook = XLSX.read(buffer, { type: 'buffer' });
+    const sheetName = workbook.SheetNames[0];
+    const sheet = workbook.Sheets[sheetName];
+    bulkjobs = XLSX.utils.sheet_to_json(sheet);
+    // console.log(bulkjobs);
+    // return res.status(200).json("file received");
     let newjobs = new Set();
     if(!bulkjobs || bulkjobs.length===0){
         return res.status(401).json({message:"jobs provided are empty"});
     }
-
+    const [jobroles] = await db.query(`select jobrole_id, jobrole_name from jobroles`)
+                                .catch(err=>{
+                                    return res.status(400).json(err.sqlMessage);
+                                });
+    const jobrolesMap = {};
+    for(let i=0;i<jobroles.length;i++){
+        const tempJob = jobroles[i];
+        jobrolesMap[tempJob.jobrole_name] = tempJob.jobrole_id;
+    }
     for(let i=0;i<bulkjobs.length;i++){
         const job = bulkjobs[i];
-        newjobs.add(job.jobrole_id);
         const jobobj = {
-            "jobrole_id":job.jobrole_id,
+            "jobrole_id":jobrolesMap[job.jobrole] ?? 59,
             "title":job.title,
             "company":job.company,
             "description":job.description,
@@ -234,16 +250,20 @@ const addBulkJobs = asyncHandler(async(req,res)=>{
             "experience":job.experience,
             "joburl":job.joburl
         };
+        newjobs.add(jobobj.jobrole_id);
         if(job.salary){
             jobobj["salary"]=job.salary;
         }
-        const jobaddsql = `insert into jobslisted set ?`;
-        const jobadded = await db.query(jobaddsql,jobobj)
-                                    .catch(err=>{
-                                        console.log(err);
-                                        return res.status(400).json({message:err.sqlMessage});
-                                    });
+        // const jobaddsql = `insert into jobslisted set ?`;
+        // const jobadded = await db.query(jobaddsql,jobobj)
+        //                             .catch(err=>{
+        //                                 console.log(err);
+        //                                 return res.status(400).json({message:err.sqlMessage});
+        //                             });
     }
+    console.log(bulkjobs.length + ` new jobs are added`); 
+
+    //storing users for whom we have to send job alert mails 
     let allusers=[];
     for(let item of newjobs){
         const jobrole = item;
@@ -252,37 +272,49 @@ const addBulkJobs = asyncHandler(async(req,res)=>{
                                     return res.status(400).json(err.sqlMessage);
                                 });
         // console.log(users);
-        allusers.push(users)
+        allusers.push(...users)
     }
-    // console.log(allusers);
-    await axios.post(`${SERVER}/admin/dataForJobAlert`,allusers)
-                .then(res=>{
-                    console.log(res.data);
-                })
+    console.log(allusers);
+
+    const finalUsers = [];
+    const unqusers = new Set();
+    for(let i=0;i<allusers.length;i++){
+        if(!unqusers.has(allusers[i].user_id)){
+            unqusers.add(allusers[i].user_id);
+            finalUsers.push({user_id:allusers[i].user_id})
+        }
+    }
+    console.log(finalUsers);
+    console.log(unqusers);
+
+    for(let i=0;i<finalUsers.length;i++){
+        const tempobj = finalUsers[i];
+        await db.query(`insert into jobalertusers set ?`,[tempobj])
                 .catch(err=>{
-                    console.log(err);
+                    return res.status(400).json(err.sqlMessage);
                 });
+    }
+    
+    // await axios.post(`${SERVER}/admin/dataForJobAlert`,allusers)
+    //             .then(res=>{
+    //                 console.log(res.data);
+    //             })
+    //             .catch(err=>{
+    //                 console.log(err);
+    //             });
     return res.status(200).json({message:bulkjobs.length + ` new jobs are added`});
 });
 
 const dataForJobAlert = asyncHandler(async(req,res)=>{
-    const allusers = req.body;
-    console.log(allusers);
-    const unqusers = new Set();
-
-    for(let i=0;i<allusers.length;i++){
-        // console.log(allusers[i]);
-        for(let item of allusers[i]){
-            // const item = allusers[i][j];
-            // console.log(item);
-            unqusers.add(item.user_id);
-        }
-    }
+    const [unqusers] = await db.query(`select user_id from jobalertusers`)
+                                .catch(err=>{
+                                    return res.status(400).json(err.sqlMessage);
+                                });
     console.log(unqusers);
     let dest = [];
     const jobsPageLink = `${CLIENT}/all-job-opportunities.php`;
     for(let item of unqusers){
-        const [data] = await db.query(`select firstname as name, email from userdetails where user_id = ?`,[item])
+        const [data] = await db.query(`select firstname as name, email from userdetails where user_id = ?`,[item.user_id])
                                 .catch(err=>{
                                     return res.status(400).json(err.sqlMessage);
                                 });
