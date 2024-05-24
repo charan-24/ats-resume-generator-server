@@ -3,7 +3,7 @@ const exp = require('express');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
 const app=exp();
-// const cron = require('node-cron');
+const cron = require('node-cron');
 const axios  = require('axios');
 const port = process.env.PORT || 5000;
 console.log(port);
