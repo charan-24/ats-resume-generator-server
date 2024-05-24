@@ -3,7 +3,7 @@ const exp = require('express');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
 const app=exp();
-const cron = require('node-cron');
+// const cron = require('node-cron');
 const axios  = require('axios');
 const port = process.env.PORT || 5000;
 console.log(port);
@@ -34,16 +34,16 @@ app.use('/pfp',require('./routes/pfp'));
 app.use('/logout',require('./routes/logout'));
 app.use('/skills',require('./routes/skills'));
 
-cron.schedule('17 19 * * *', async () => {
-    console.log(`cron satrted on ${SERVER}`)
-    await axios.post(`${SERVER}/admin/dataForJobAlert`)
-                .then(res=>{
-                    console.log(res.data);
-                })
-                .catch(err=>{
-                    console.log(err);
-                });
-});
+// cron.schedule('17 19 * * *', async () => {
+//     console.log(`cron satrted on ${SERVER}`)
+//     await axios.post(`${SERVER}/admin/dataForJobAlert`)
+//                 .then(res=>{
+//                     console.log(res.data);
+//                 })
+//                 .catch(err=>{
+//                     console.log(err);
+//                 });
+// });
 
 app.listen(port,()=>{
     console.log(`server started on port ${port}`);
