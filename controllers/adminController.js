@@ -223,8 +223,6 @@ const addBulkJobs = asyncHandler(async(req,res)=>{
     const sheetName = workbook.SheetNames[0];
     const sheet = workbook.Sheets[sheetName];
     bulkjobs = XLSX.utils.sheet_to_json(sheet);
-    // console.log(bulkjobs);
-    // return res.status(200).json("file received");
     let newjobs = new Set();
     if(!bulkjobs || bulkjobs.length===0){
         return res.status(401).json({message:"jobs provided are empty"});
@@ -254,12 +252,12 @@ const addBulkJobs = asyncHandler(async(req,res)=>{
         if(job.salary){
             jobobj["salary"]=job.salary;
         }
-        // const jobaddsql = `insert into jobslisted set ?`;
-        // const jobadded = await db.query(jobaddsql,jobobj)
-        //                             .catch(err=>{
-        //                                 console.log(err);
-        //                                 return res.status(400).json({message:err.sqlMessage});
-        //                             });
+        const jobaddsql = `insert into jobslisted set ?`;
+        const jobadded = await db.query(jobaddsql,jobobj)
+                                    .catch(err=>{
+                                        console.log(err);
+                                        return res.status(400).json({message:err.sqlMessage});
+                                    });
     }
     console.log(bulkjobs.length + ` new jobs are added`); 
 
@@ -294,14 +292,7 @@ const addBulkJobs = asyncHandler(async(req,res)=>{
                     return res.status(400).json(err.sqlMessage);
                 });
     }
-    
-    // await axios.post(`${SERVER}/admin/dataForJobAlert`,allusers)
-    //             .then(res=>{
-    //                 console.log(res.data);
-    //             })
-    //             .catch(err=>{
-    //                 console.log(err);
-    //             });
+
     return res.status(200).json({message:bulkjobs.length + ` new jobs are added`});
 });
 
