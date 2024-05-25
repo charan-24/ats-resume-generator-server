@@ -9,7 +9,6 @@ const {
     PutObjectCommand,
     GetObjectCommand,
   } = require("@aws-sdk/client-s3");
-const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
 const crypto = require("crypto");
 const SERVER = process.env.SERVER;
 const CLIENT = process.env.CLIENT;
@@ -53,11 +52,11 @@ const getAdminOverview = asyncHandler(async(req,res)=>{
                                     });
     adminoverview["jobslisted"] = jobslisted;
 
-    const [feedbacks] = await db.query(`select * from feedbacks order by issue_date desc`)
-                                    .catch(err=>{
-                                        return res.status(400).json(err.sqlMessage)
-                                    });
-    adminoverview["feedbacks"] = feedbacks;
+    // const [feedbacks] = await db.query(`select * from feedbacks order by issue_date desc`)
+    //                                 .catch(err=>{
+    //                                     return res.status(400).json(err.sqlMessage)
+    //                                 });
+    // adminoverview["feedbacks"] = feedbacks;
 
     const [hackathons] = await db.query(`select * from hackathons`)
                                     .catch(err=>{
