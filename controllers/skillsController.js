@@ -207,6 +207,19 @@ const deleteWorkshop = asyncHandler(async(req,res)=>{
     }
 });
 
+const getTrainingRegisteredUsers = asyncHandler(async(req,res)=>{
+    const registered = {};
+    const [trainings] = await db.query(`select ta.*, t.title, t.registrationfee, u.username, u.firstname, u.lastname from trainingsapplied ta
+                                        join trainings t on ta.training_id = t.training_id
+                                        join userdetails u on ta.user_id = u.user_id`)
+                                    .catch(err=>{
+                                        return res.status(400).json(err.sqlMessage);
+                                    });
+    registered["trainings"] = trainings;
+
+    return res.status(200).json(registered);
+});
+
 module.exports = {
     getTrainings,
     getCourses,
@@ -218,5 +231,6 @@ module.exports = {
     editCourse,
     deleteCourse,
     editWorkshop,
-    deleteWorkshop
+    deleteWorkshop,
+    getTrainingRegisteredUsers
 }

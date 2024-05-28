@@ -163,6 +163,41 @@ const getEventsRegisteredUsers = asyncHandler(async(req,res)=>{
     return res.status(200).json(registered);
 });
 
+const makeWinner = asyncHandler(async(req,res)=>{
+    const winnerBody = req.body;
+    console.log(winnerBody);
+    if(winnerBody.eventType == 'meetup'){
+        await db.query(`update meetupsapplied set ? where user_id = ? and event_id = ?`,[{isWinner:1},winnerBody.userId,winnerBody.eventId])
+                .catch(err=>{
+                    return res.status(400).json(err.sqlMessage);
+                })
+    }
+    else {
+        await db.query(`update eventsapplied set ? where type = ? and user_id = ? and event_id = ?`,[{isWinner:1},winnerBody.eventType,winnerBody.userId,winnerBody.eventId])
+                .catch(err=>{
+                    return res.status(400).json(err.sqlMessage);
+                })
+    }
+    return res.status(200).json(`winner for ${winnerBody.eventType} updated`);
+});
+const revokeWinner = asyncHandler(async(req,res)=>{
+    const winnerBody = req.body;
+    console.log(winnerBody);
+    if(winnerBody.eventType == 'meetup'){
+        await db.query(`update meetupsapplied set ? where user_id = ? and event_id = ?`,[{isWinner:0},winnerBody.userId,winnerBody.eventId])
+                .catch(err=>{
+                    return res.status(400).json(err.sqlMessage);
+                })
+    }
+    else {
+        await db.query(`update eventsapplied set ? where type = ? and user_id = ? and event_id = ?`,[{isWinner:0},winnerBody.eventType,winnerBody.userId,winnerBody.eventId])
+                .catch(err=>{
+                    return res.status(400).json(err.sqlMessage);
+                })
+    }
+    return res.status(200).json(`winner for ${winnerBody.eventType} revoked`);
+});
+
 module.exports = {
     getUpComingHackathons,
     getRecentHackathons,
@@ -176,6 +211,8 @@ module.exports = {
     getEventStats,
     editEvent,
     deleteEvent,
-    getEventsRegisteredUsers
+    getEventsRegisteredUsers,
+    makeWinner,
+    revokeWinner
 }
 

@@ -723,7 +723,9 @@ const addACourse = asyncHandler(async(req,res)=>{
                 return res.status(500).json(err.sqlMessage);
             });        
     return res.status(200).json("course added");
-})
+});
+
+
 
 
 
@@ -754,5 +756,5 @@ module.exports = {
     dataForJobAlert,
     addATraining,
     addAWorkshop,
-    addACourse
+    addACourse,
 }

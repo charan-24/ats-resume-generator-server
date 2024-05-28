@@ -15,6 +15,9 @@ router.get('/getEventStats',eventsController.getEventStats);
 router.post('/editEvent',eventsController.editEvent);
 router.delete('/deleteEvent/:type/:eventId',eventsController.deleteEvent);
 router.get('/getEventsRegisteredUsers',eventsController.getEventsRegisteredUsers);
+router.post('/makeWinner',eventsController.makeWinner);
+router.post('/revokeWinner',eventsController.revokeWinner);
+
 
 
 module.exports = router;
