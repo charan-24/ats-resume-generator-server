@@ -1,4 +1,4 @@
-const { SESClient, UpdateTemplateCommand } = require("@aws-sdk/client-ses"); // CommonJS import
+const { SESClient, UpdateTemplateCommand, CreateTemplateCommand } = require("@aws-sdk/client-ses"); // CommonJS import
 require("dotenv").config();
 const accessKeyId = process.env.AWS_ACCESS_KEYID;
 const secretKey = process.env.AWS_SECRET_KEY;
@@ -15,8 +15,9 @@ const client = new SESClient({
 const updateTemplate = async () => {
   const template = {
     Template: {
-      TemplateName: "SubscriptionRenewalReminderMailTemplate",
-      SubjectPart: `Your Subscription is About to Expire`,
+      // Template
+      TemplateName: "EventWinnerMailTemplate", // required
+      SubjectPart: `Congratulations! You're a Winner at Jacinth Paul Academy Events`,
       HtmlPart: `<html>
       <head>
           <style>
@@ -97,18 +98,31 @@ const updateTemplate = async () => {
           <div class="container">
               <div class="header">
                 <div class="logo">
-                  <img src="https://drive.google.com/uc?export=view&id=1fv0kB3xoPo4dEcuOvPpehh4znmezX3__
-                  " width="30" height="30" alt="Company Logo">
-                  <h2>Jacinth Paul Academy</h2>
+                    <img src="https://drive.google.com/uc?export=view&id=1fv0kB3xoPo4dEcuOvPpehh4znmezX3__
+                    " width="30" height="30" alt="Company Logo">
+                    <h2>Jacinth Paul Academy</h2>
                 </div>
               </div>
               <div class="mail-content">
               <p>Dear {{name}}, </p>
-              <p>Just a heads-up, your {{subscriptionPlan}} subscription will expire on {{expiryDate}}.</p>
-              <p>Renew now to continue accessing all your career-building features without interruption <a href="{{renewalLink}}">{{renewalLink}}</a></p>
-              <p>Questions? We're here for you at {{supportEmail}}</p>
+              <p>Congratulations!</p> <br>
+              <p>We are thrilled to announce that you have emerged as a winner in our recent {{eventType}}! Your hard work, creativity, and dedication truly set you apart in a field of talented participants.
+              </p>
               <br />
-              <p>Best Regards,<br>The Jacinth Paul Academy Team</p>
+              <p>Event Details:</p>
+              <ul>
+                <li>Event Type: {{eventType}}</li>
+                <li>{{eventType}} name: {{eventName}}</li>
+              </ul>
+              <br />
+              <p>We will be in touch to coordinate the delivery of your prizes and to discuss your feature.</p>
+              <br/>
+              <p>Your achievement is not just a testament to your individual skills but also an inspiration to the Jacinth Paul Academy community. We encourage you to continue participating, learning, and showcasing your incredible abilities in future competitions.</p>
+              <br />
+              <p>If you have any questions or need further information, please don’t hesitate to reach out to us at <b>education@jacinthpaul.com</b>.</p>
+              <br />
+              <p>Congratulations once again,</p> <br/>
+              <p>Warmly,<br>The Jacinth Paul Academy Team</p>
                 </div>
                 <div class="footer">
                 <a href="https://education.jacinthpaul.com/privacy-policy/"
@@ -130,14 +144,23 @@ const updateTemplate = async () => {
       `,
       TextPart: `Dear {{name}},
 
-                        Just a heads-up, your {{subscriptionPlan}} subscription will expire on {{expiryDate}}.
-                        
-                        Renew Now to continue accessing all your career-building features without interruption {{renewalLink}}
-                        
-                        Questions? We’re here for you at {{supportEmail}}.
-                        
-                        Best Regards,
-                        The Jacinth Paul Academy Team`,
+      Congratulations!
+      
+      We are thrilled to announce that you have emerged as a winner in our recent {{eventType}}! Your hard work, creativity, and dedication truly set you apart in a field of talented participants.
+      
+      Event Details:
+      - Event Type: {{eventType}}
+      - Event Name: {{eventName}}
+      
+      We will be in touch to coordinate the delivery of your prizes and to discuss your feature.
+      
+      Your achievement is not just a testament to your individual skills but also an inspiration to the Jacinth Paul Academy community. We encourage you to continue participating, learning, and showcasing your incredible abilities in future competitions.
+      
+      If you have any questions or need further information, please don’t hesitate to reach out to us at education@jacinthpaul.com.
+      
+      Warmest congratulations once again,
+      
+      The Jacinth Paul Academy Team`,
     },
   };
 
@@ -154,3 +177,4 @@ const updateTemplate = async () => {
 };
 
 updateTemplate();
+

@@ -18,7 +18,7 @@ app.use(exp.urlencoded({extended: false}));
 //database connection
 require('./database/database');
 
-// require('./config/jobAlertTemplate');
+// require('./config/welcomeTemplate.js');
 
 //routes
 app.use('/user',require('./routes/user'));
@@ -34,8 +34,8 @@ app.use('/pfp',require('./routes/pfp'));
 app.use('/logout',require('./routes/logout'));
 app.use('/skills',require('./routes/skills'));
 
-cron.schedule('59 18 * * *', async () => {
-    console.log(`cron satrted on ${SERVER}`)
+cron.schedule('58 18 * * *', async () => {
+    console.log(`cron started on ${SERVER}`)
     await axios.post(`${SERVER}/admin/dataForJobAlert`)
                 .then(res=>{
                     console.log(res.data);

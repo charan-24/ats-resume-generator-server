@@ -97,10 +97,11 @@ const updateTemplate = async () => {
             <body>
                 <div class="container">
                     <div class="header">
-                        <div class="logo">
-                            <img src="https://drive.google.com/uc?id=1-VFOZGTOE-omRc0KXKEPNvFGGKH0HLeG" width="30" height="30" alt="Company Logo">
-                            <h2>Jacinth Paul Academy</h2>
-                        </div>
+                      <div class="logo">
+                        <img src="https://drive.google.com/uc?export=view&id=1fv0kB3xoPo4dEcuOvPpehh4znmezX3__
+                        " width="30" height="30" alt="Company Logo">
+                        <h2>Jacinth Paul Academy</h2>
+                      </div>
                     </div>
                     <div class="mail-content">
                     <p>Dear {{name}}, </p>

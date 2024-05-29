@@ -334,7 +334,42 @@ const sendJobAlertMails = asyncHandler(async(req,res)=>{
     }
     return res.status(200).json("jobalert mail sent");
 
-})
+});
+
+const sendEventWinnerMail = asyncHandler(async(req,res)=>{
+    const {name, email, eventType, eventName} = req.body;
+    const client = new SESClient({
+        region: regionName,
+        credentials:{
+            accessKeyId: accessKeyId,
+            secretAccessKey: secretKey
+        }
+    });
+
+    // const name = username || role;
+    const recipentMail = email;
+    const templateName = "EventWinnerMailTemplate";
+
+    const input = {
+        Destination: {
+            ToAddresses: [
+                recipentMail
+            ],
+        },
+        Source: senderMail,
+        Template: templateName,
+        TemplateData: JSON.stringify({name,eventType,eventName}),
+    };
+    try{
+        const sendCmd = new SendTemplatedEmailCommand(input);
+        const response = await client.send(sendCmd);
+        console.log(response);
+    }
+    catch(err){
+        return res.status(400).json("error");
+    }
+    return res.status(200).json("Event Winner mail sent");
+});
 
 
 module.exports = {
@@ -345,5 +380,6 @@ module.exports = {
     sendResumeRequestMail,
     sendResumeDownloadMail,
     sendFeedbackMail,
-    sendJobAlertMails
+    sendJobAlertMails,
+    sendEventWinnerMail
 }

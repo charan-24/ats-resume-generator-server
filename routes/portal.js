@@ -10,5 +10,6 @@ router.post('/sendResumeRequestMail',emailController.sendResumeRequestMail);
 router.post('/sendResumeDownloadMail',emailController.sendResumeDownloadMail);
 router.post('/sendFeedbackMail',emailController.sendFeedbackMail);
 router.post('/sendJobAlertMails',emailController.sendJobAlertMails);
+router.post('/sendEventWinnerMail',emailController.sendEventWinnerMail);
 
 module.exports = router;
