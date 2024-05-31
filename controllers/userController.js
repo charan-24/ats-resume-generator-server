@@ -51,9 +51,7 @@ const userRegistration = asyncHandler(async (req, res) => {
             ua=1;
             return res.status(400).json({message:err.sqlMessage});
         });
-    // if(ua==1){
-    //     return;
-    // }
+        
     const [userid] = await db.query(`select user_id from useraccounts where username = ?`, [username]);
     console.log("userid:" + userid[0].user_id)
 
@@ -117,10 +115,6 @@ const userRegistration = asyncHandler(async (req, res) => {
     //     return;
 
     return res.status(200).json({message:"useradded",userid:userid[0].user_id});
-    // return res.status(200).json({message:"useradded",userid:15});
-
-    // return res.status(200).json("no duplicates");
-
 });
 
 //select preferred roles

@@ -45,6 +45,19 @@ cron.schedule('58 18 * * *', async () => {
                 });
 });
 
+cron.schedule('55 15 * * *', async ()=>{
+    console.log("removeJobAlertUsers");
+    await axios.delete(`${SERVER}/portal/removeJobAlertUsers`)
+        .then(res=>{
+            console.log(res.data);
+        })
+        .catch(err=>{
+            console.log(err);
+        });
+});
+
+
+
 app.listen(port,()=>{
     console.log(`server started on port ${port}`);
 });

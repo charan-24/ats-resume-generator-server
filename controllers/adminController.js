@@ -191,7 +191,7 @@ const getAllJobs = asyncHandler(async(req,res)=>{
 const addAJob = asyncHandler(async(req,res)=>{
     const {jobrole_id, jobtitle, location, company, jobtype, experience, description,joburl} = req.body;
     console.log(req.body);
-    if(!jobrole_id || !jobtitle || !location || !company || !jobtype || !experience || !description || joburl){
+    if(!jobrole_id || !jobtitle || !location || !company || !jobtype || !experience || !description || !joburl){
         return res.status(401).json({message:"all fields required"});
     }
     const jobobj = {
@@ -370,85 +370,89 @@ const deleteUser = asyncHandler(async(req,res)=>{
     if(!user_id || !role){
         return res.status(401).json({message:"data required"});
     }
-    if(role=="user"){
-        const [foundUser] = await db.query(`select user_id from useraccounts where user_id = ?`,[user_id]);
-        if(!foundUser[0]){
-            return res.status(201).json({message:"no user found"});
-        }
-        const work = await db.query(`delete from workexperience where user_id = ?`,[user_id])
-                                .then(res=>{
-                                    console.log("workexperience deleted");
-                                })
-                                .catch(err=>{
-                                    return res.status(201).json({message:err.sqlMessage});
-                                })
-        const usercertificates = await db.query(`delete from usercertificates where user_id = ?`,[user_id])
-                                            .then(res=>{
-                                                console.log("certificates deleted");                                
-                                            })
-                                            .catch(err=>{
-                                                return res.status(201).json({message:err.sqlMessage});
-                                            });
-        const userprojects = await db.query(`delete from userprojects where user_id = ?`,[user_id])
-                                            .then(res=>{
-                                                console.log("userprojects deleted");                                
-                                            })
-                                            .catch(err=>{
-                                                return res.status(201).json({message:err.sqlMessage});
-                                            });
-        const feedbacks = await db.query(`delete from feedbacks where user_id = ?`,[user_id])
-                                            .then(res=>{
-                                                console.log("feedbacks deleted");                                
-                                            })
-                                            .catch(err=>{
-                                                return res.status(201).json({message:err.sqlMessage});
-                                            });
-        const education = await db.query(`delete from educationaldetails where user_id = ?`,[user_id])
+    try{
+        if(role=="user"){
+            const [foundUser] = await db.query(`select user_id from useraccounts where user_id = ?`,[user_id]);
+            if(!foundUser[0]){
+                return res.status(201).json({message:"no user found"});
+            }
+            const work = await db.query(`delete from workexperience where user_id = ?`,[user_id])
                                     .then(res=>{
-                                        console.log("educational details deleted");                                
+                                        console.log("workexperience deleted");
                                     })
                                     .catch(err=>{
                                         return res.status(201).json({message:err.sqlMessage});
-                                    });
-        const userdetail = await db.query(`delete from userdetails where user_id = ?`,[user_id])
-                                    .then(res=>{
-                                        console.log("user details deleted");                                
                                     })
-                                    .catch(err=>{
-                                        return res.status(201).json({message:err.sqlMessage});
-                                    });
-        const useraccount = await db.query(`delete from useraccounts where user_id = ?`,[user_id])
-                                    .then(res=>{
-                                        console.log("useraccount deleted");
-                                    })
-                                    .catch(err=>{
-                                        return res.status(201).json({message:err.sqlMessage});
-                                    });
-    }
-    else if(role=="hr"){
-        const [foundUser] = await db.query(`select hr_id from hraccounts where hr_id = ?`,[user_id]);
-        if(!foundUser[0]){
-            return res.status(201).json({message:"no hr found"});
+            const usercertificates = await db.query(`delete from usercertificates where user_id = ?`,[user_id])
+                                                .then(res=>{
+                                                    console.log("certificates deleted");                                
+                                                })
+                                                .catch(err=>{
+                                                    return res.status(201).json({message:err.sqlMessage});
+                                                });
+            const userprojects = await db.query(`delete from userprojects where user_id = ?`,[user_id])
+                                                .then(res=>{
+                                                    console.log("userprojects deleted");                                
+                                                })
+                                                .catch(err=>{
+                                                    return res.status(201).json({message:err.sqlMessage});
+                                                });
+            const feedbacks = await db.query(`delete from feedbacks where user_id = ?`,[user_id])
+                                                .then(res=>{
+                                                    console.log("feedbacks deleted");                                
+                                                })
+                                                .catch(err=>{
+                                                    return res.status(201).json({message:err.sqlMessage});
+                                                });
+            const education = await db.query(`delete from educationaldetails where user_id = ?`,[user_id])
+                                        .then(res=>{
+                                            console.log("educational details deleted");                                
+                                        })
+                                        .catch(err=>{
+                                            return res.status(201).json({message:err.sqlMessage});
+                                        });
+            const userdetail = await db.query(`delete from userdetails where user_id = ?`,[user_id])
+                                        .then(res=>{
+                                            console.log("user details deleted");                                
+                                        })
+                                        .catch(err=>{
+                                            return res.status(201).json({message:err.sqlMessage});
+                                        });
+            const useraccount = await db.query(`delete from useraccounts where user_id = ?`,[user_id])
+                                        .then(res=>{
+                                            console.log("useraccount deleted");
+                                        })
+                                        .catch(err=>{
+                                            return res.status(201).json({message:err.sqlMessage});
+                                        });
         }
-
-        const [hrdel] = await db.query(`delete from hraccounts where hr_id = ?`,[user_id])
-                .catch(err=>{
-                    return res.status(400).json(err.sqlMessage);
-                });
-    }
-    else if(role=="tpo"){
-        const [foundUser] = await db.query(`select tpo_id from tpoaccounts where tpo_id = ?`,[user_id]);
-        if(!foundUser[0]){
-            return res.status(201).json({message:"no tpo found"});
+        else if(role=="hr"){
+            const [foundUser] = await db.query(`select hr_id from hraccounts where hr_id = ?`,[user_id]);
+            if(!foundUser[0]){
+                return res.status(201).json({message:"no hr found"});
+            }
+    
+            const [hrdel] = await db.query(`delete from hraccounts where hr_id = ?`,[user_id])
+                    .catch(err=>{
+                        return res.status(400).json(err.sqlMessage);
+                    });
         }
-
-        const [tpodel] = await db.query(`delete from tpoaccounts where tpo_id = ?`,[user_id])
-                .catch(err=>{
-                    return res.status(400).json(err.sqlMessage);
-                });
+        else if(role=="tpo"){
+            const [foundUser] = await db.query(`select tpo_id from tpoaccounts where tpo_id = ?`,[user_id]);
+            if(!foundUser[0]){
+                return res.status(201).json({message:"no tpo found"});
+            }
+    
+            const [tpodel] = await db.query(`delete from tpoaccounts where tpo_id = ?`,[user_id])
+                    .catch(err=>{
+                        return res.status(400).json(err.sqlMessage);
+                    });
+        }
+        return res.status(200).json({message: role+" deleted"});
     }
-
-    return res.status(200).json({message: role+" deleted"});
+    catch(error){
+        return res.status(500).json("error deleting user");
+    }
 });
 
 const addHackathon = asyncHandler(async(req,res)=>{

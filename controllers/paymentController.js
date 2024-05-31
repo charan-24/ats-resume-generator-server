@@ -41,9 +41,11 @@ const validatePayment = asyncHandler(async(req,res)=>{
     let fullname = razorpaydetails.fullname;
     let email = razorpaydetails.email;
     let type = razorpaydetails.type;
-    let eventId = razorpaydetails.eventId;
-    console.log(type,eventId);
-    // console.log(razorpaydetails);
+    if(razorpaydetails.eventId){
+        let eventId = razorpaydetails.eventId;
+    }
+    console.log(type);
+    console.log(razorpaydetails);
     if(!razorpaydetails || !Object.keys(razorpaydetails).length){
         return res.status(400).json({message:"empty data provided"});
     }
@@ -70,7 +72,7 @@ const validatePayment = asyncHandler(async(req,res)=>{
         "resumesplan":10,
         "resumesused":0
     }
-    // console.log(subobj);
+    console.log("subobj:"+subobj);
     if(type == 'annual'){
         const subs = await db.query(`insert into subscriptions set ?`,subobj)
                             .catch(err=>{
