@@ -184,7 +184,7 @@ const getPreferredRoles = asyncHandler(async(req,res)=>{
 
 const editUserProfile = asyncHandler(async(req,res)=>{
     const changesobj = req.body;
-    // console.log(req.body);
+    console.log(req.body);
     const user_id = changesobj.user_id;
     if(!changesobj || !user_id){
             return res.status(401).json({message:"no data provided"});
@@ -210,10 +210,11 @@ const editUserProfile = asyncHandler(async(req,res)=>{
 
     const details = {};
     for(let key in changesobj){
-        if(key === "first_name" || key === "last_name" || key === "email" || key ==="email_org" || key === "phone_number" || key ==="city" || key === "strength" || key ==="weakness"){
+        if(key === "first_name" || key === "last_name" || key === "email" || key ==="email_org" || key === "phone_number" || key === "linkedinurl" || key ==="city" || key === "strength" || key ==="weakness"){
             details[`${key}`]=changesobj[key]
         }
     }
+    console.log(details);
     const sql = `update userdetails set ? where user_id = ?`;
 
     if(Object.keys(details).length>=1){

@@ -308,17 +308,20 @@ const dataForJobAlert = asyncHandler(async(req,res)=>{
                                 .catch(err=>{
                                     return res.status(400).json(err.sqlMessage);
                                 });
-        const name = data[0].name;
-        const obj = {
-            Destination: {
-                ToAddresses: [data[0].email],
-            },
-            ReplacementTemplateData: JSON.stringify({"name":name,"jobsPageLink":jobsPageLink}),
+        if(data[0]){
+            console.log(item.user_id+" "+data[0])
+            const name = data[0].name;
+            const obj = {
+                Destination: {
+                    ToAddresses: [data[0].email],
+                },
+                ReplacementTemplateData: JSON.stringify({"name":name,"jobsPageLink":jobsPageLink}),
+            }
+            console.log(obj.Destination.ToAddresses[0]);
+            dest.push(obj);
         }
-        console.log(obj.Destination.ToAddresses[0]);
-        dest.push(obj);
     }
-    // console.log(dest);
+    console.log(dest);
     await axios.post(`${SERVER}/portal/sendJobAlertMails`,dest)
                 .then(res=>{
                     console.log(res.data);
@@ -327,7 +330,7 @@ const dataForJobAlert = asyncHandler(async(req,res)=>{
                     console.log(err);
                 });
     return res.status(200).json("bulk mail data done");
-})
+});
 
 const editJob = asyncHandler(async(req,res)=>{
     let {job_id,changedjob} = req.body;

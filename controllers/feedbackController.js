@@ -73,7 +73,7 @@ const changeStatus = asyncHandler(async(req,res)=>{
 const uploadFeedbackScreenshot = asyncHandler(async(req,res)=>{
     const {feedbackId} = req.params;
     let screenshotBuffer = req?.file?.buffer;
-    // console.log(screenshotBuffer);
+    console.log(screenshotBuffer);
 
     const s3 = new S3Client({
         region: regionName,
@@ -90,7 +90,7 @@ const uploadFeedbackScreenshot = asyncHandler(async(req,res)=>{
       Bucket: bucketName,
       Key: filePath,
       Body: screenshotBuffer,
-      ContentType: req.file.mimetype,
+      ContentType: req?.file?.mimetype,
     };
 
     try {
