@@ -34,7 +34,7 @@ app.use('/pfp',require('./routes/pfp'));
 app.use('/logout',require('./routes/logout'));
 app.use('/skills',require('./routes/skills'));
 
-cron.schedule('28 00 * * *', async () => {
+cron.schedule('28 13 * * *', async () => {
     console.log(`cron started on ${SERVER}`)
     await axios.post(`${SERVER}/admin/dataForJobAlert`)
                 .then(res=>{
