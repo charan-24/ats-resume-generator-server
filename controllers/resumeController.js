@@ -218,6 +218,7 @@ const jsonToPdf = asyncHandler(async (req, res) => {
     Education: [],
     Experience: [],
     Projects: [],
+    Certifications: [],
     // Extracurriculars: [
     //   "Committee member of Turing Hut, the Programming Club at VNR VJIET. Developed visually appealing posters and created informative documents to enhance communication and promotion of club events. Organized and facilitated coding contests, workshops, created posters and made documents and peer-to-peer teaching sessions as part of the club’s initiatives.",
     //   "Attended a 10 days Bootcamp conducted by the WE program. It covered self-learning tools, modern programming languages and corporate skills.",
@@ -251,12 +252,20 @@ const jsonToPdf = asyncHandler(async (req, res) => {
       Description: work.job_description,
     });
   });
+
   jsondata.projects.map((project) => {
     resumeContent?.Projects?.push({
       name: project.title,
       description: project.description,
     });
   });
+  jsondata.certificates.map((certificate) => {
+    resumeContent?.Certifications?.push({
+      name: certificate.title,
+      issuedby: certificate.issuedby,
+    });
+  });
+
   const doc = new PDFDocument({
     margins: {
       top: 35,
@@ -467,13 +476,15 @@ const jsonToPdf = asyncHandler(async (req, res) => {
   });
 
   // Add Extracurriculars Section
-  // generateHeading("Extracurriculars");
-  // generateLine();
-  // resumeContent.Extracurriculars.forEach((activity) => {
-  //   generateBulletPoint();
-  //   generateContent(capitalizeFirstLetterOfSentence(activity));
-  //   addNewLine(1.5);
-  // });
+  generateHeading("Certifications");
+  generateLine();
+  resumeContent.Certifications.forEach((certificate) => {
+    generateBulletPoint();
+    generateContent(capitalizeFirstLetterOfSentence(certificate.name),true);
+    generateRightAlignedContent(capitalizeFirstLetterOfSentence(certificate.issuedby));
+    resetAlignment
+    addNewLine(1.5);
+  });
 
   // Add Honors and Awards Section
   // generateHeading("Honors and Awards");
