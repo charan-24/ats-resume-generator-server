@@ -340,8 +340,11 @@ const userLogin = asyncHandler(async(req,res)=>{
     }
     const [foundUser] = await db.query(`select user_id, password, username, role, subscribed, isActive from useraccounts where username = ? || email = ?`,[username,username]);
     // console.log(foundUser[0]);
-    if(!foundUser[0] || !Object.keys(foundUser[0]).length || !foundUser[0].subscribed || !foundUser[0].isActive){
+    if(!foundUser[0] || !Object.keys(foundUser[0]).length || !foundUser[0].isActive){
         return res.status(401).json({message:"user not found"});
+    }
+    else if(!foundUser[0].subscribed){
+        return res.status(200).json({message:"notsubscribed"});
     }
     const match = await bcrypt.compare(password,foundUser[0].password);
     if(match){

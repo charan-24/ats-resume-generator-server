@@ -41,8 +41,8 @@ const validatePayment = asyncHandler(async(req,res)=>{
     let fullname = razorpaydetails.fullname;
     let email = razorpaydetails.email;
     let type = razorpaydetails.type;
-    if(razorpaydetails.eventId){
-        let eventId = razorpaydetails.eventId;
+    if(parseInt(razorpaydetails.eventId)){
+        let eventId = parseInt(razorpaydetails.eventId);
     }
     console.log(type);
     console.log(razorpaydetails);
@@ -78,7 +78,7 @@ const validatePayment = asyncHandler(async(req,res)=>{
                             .catch(err=>{
                                 return res.status(400).json({message: err.sqlMessage});
                             });
-        const paid = await db.query('update useraccounts set ? where user_id = ?',[{subscribed:true,resumesplan:10},user_id]);
+        const paid = await db.query('update useraccounts set ? where user_id = ?',[{subscribed:1,resumesplan:10},user_id]);
         let startDate = subobj.startdate + '';
         startDate = startDate.slice(4, 15);
         let endDate = subobj.enddate+'';
@@ -93,6 +93,7 @@ const validatePayment = asyncHandler(async(req,res)=>{
             "dashboard":"https://education.jacinthpaul.com/app/overview.php",
             "support":"education@jacinthpaul.com"
         }
+        console.log(postData);
 
         axios.post(`${SERVER}/portal/sendPaymentConfirmMail`,postData)
                         .then(res=>{

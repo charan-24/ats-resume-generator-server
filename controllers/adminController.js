@@ -322,13 +322,15 @@ const dataForJobAlert = asyncHandler(async(req,res)=>{
         }
     }
     console.log(dest);
-    await axios.post(`${SERVER}/portal/sendJobAlertMails`,dest)
-                .then(res=>{
-                    console.log(res.data);
-                })
-                .catch(err=>{
-                    console.log(err);
-                });
+    if(dest.length>=1){
+        await axios.post(`${SERVER}/portal/sendJobAlertMails`,dest)
+                    .then(res=>{
+                        console.log(res.data);
+                    })
+                    .catch(err=>{
+                        console.log(err);
+                    });
+    }
     return res.status(200).json("bulk mail data done");
 });
 
@@ -390,44 +392,50 @@ const deleteUser = asyncHandler(async(req,res)=>{
                                                 .then(res=>{
                                                     console.log("certificates deleted");                                
                                                 })
-                                                .catch(err=>{
-                                                    return res.status(201).json({message:err.sqlMessage});
-                                                });
+                                                
             const userprojects = await db.query(`delete from userprojects where user_id = ?`,[user_id])
                                                 .then(res=>{
                                                     console.log("userprojects deleted");                                
                                                 })
-                                                .catch(err=>{
-                                                    return res.status(201).json({message:err.sqlMessage});
-                                                });
+                                                
             const feedbacks = await db.query(`delete from feedbacks where user_id = ?`,[user_id])
                                                 .then(res=>{
                                                     console.log("feedbacks deleted");                                
                                                 })
-                                                .catch(err=>{
-                                                    return res.status(201).json({message:err.sqlMessage});
-                                                });
+                                                
             const education = await db.query(`delete from educationaldetails where user_id = ?`,[user_id])
                                         .then(res=>{
                                             console.log("educational details deleted");                                
                                         })
-                                        .catch(err=>{
-                                            return res.status(201).json({message:err.sqlMessage});
-                                        });
+            const userpreferredjobroles = await db.query(`delete from preferredjobroles where user_id = ?`,[user_id])
+                                        .then(res=>{
+                                            console.log("userpreferredjobroles deleted");
+                                        })
+                                        
+             const uservents        =   await db.query(`delete from eventsapplied where user_id = ?`,[user_id])
+                                        .then(res=>{
+                                            console.log("userevents deleted");
+                                        })
+                                        
+            const   usertraining  =      await db.query(`delete from trainingsapplied where user_id = ?`,[user_id])
+                                        .then(res=>{
+                                            console.log("usertraining deleted");
+                                        })
+                                        
+            const   usersubscriptions  =      await db.query(`delete from subscriptions where user_id = ?`,[user_id])
+                                        .then(res=>{
+                                            console.log("usersubscriptions deleted");
+                                        })
+                                        
             const userdetail = await db.query(`delete from userdetails where user_id = ?`,[user_id])
                                         .then(res=>{
                                             console.log("user details deleted");                                
                                         })
-                                        .catch(err=>{
-                                            return res.status(201).json({message:err.sqlMessage});
-                                        });
+                                        
             const useraccount = await db.query(`delete from useraccounts where user_id = ?`,[user_id])
                                         .then(res=>{
                                             console.log("useraccount deleted");
-                                        })
-                                        .catch(err=>{
-                                            return res.status(201).json({message:err.sqlMessage});
-                                        });
+                                        })                                         
         }
         else if(role=="hr"){
             const [foundUser] = await db.query(`select hr_id from hraccounts where hr_id = ?`,[user_id]);
@@ -454,7 +462,7 @@ const deleteUser = asyncHandler(async(req,res)=>{
         return res.status(200).json({message: role+" deleted"});
     }
     catch(error){
-        return res.status(500).json("error deleting user");
+        return res.status(500).json(error);
     }
 });
 
