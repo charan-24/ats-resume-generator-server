@@ -397,6 +397,16 @@ const deleteUser = asyncHandler(async(req,res)=>{
                                                 .then(res=>{
                                                     console.log("userprojects deleted");                                
                                                 })
+
+            const userresumes = await db.query(`delete from userresumes where user_id = ?`,[user_id])
+                                                .then(res=>{
+                                                    console.log("userprojects deleted");                                
+                                                })
+
+            const userpfp = await db.query(`delete from userpfps where user_id = ?`,[user_id])
+                                                .then(res=>{
+                                                    console.log("userpfp deleted");                                
+                                                })
                                                 
             const feedbacks = await db.query(`delete from feedbacks where user_id = ?`,[user_id])
                                                 .then(res=>{
