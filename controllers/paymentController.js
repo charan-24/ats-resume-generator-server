@@ -79,6 +79,7 @@ const validatePayment = asyncHandler(async(req,res)=>{
                                 return res.status(400).json({message: err.sqlMessage});
                             });
         const paid = await db.query('update useraccounts set ? where user_id = ?',[{subscribed:1,resumesplan:10},user_id]);
+        console.log(paid);
         let startDate = subobj.startdate + '';
         startDate = startDate.slice(4, 15);
         let endDate = subobj.enddate+'';
