@@ -2,7 +2,7 @@ const asyncHandler = require('express-async-handler');
 const db = require('../database/database');
 
 const getUpComingHackathons = asyncHandler(async(req,res)=>{
-    const [upcoming] = await db.query(`select * from hackathons where startdate > curdate()`)
+    const [upcoming] = await db.query(`select * from hackathons where startdate >= curdate()`)
                                 .catch(err=>{
                                     return res.status(400).json({message:err.sqlMessage});
                                 });
