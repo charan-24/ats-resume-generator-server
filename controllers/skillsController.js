@@ -3,6 +3,7 @@ const db = require('../database/database');
 const axios = require('axios');
 const {S3Client, PutObjectCommand, GetObjectCommand} = require("@aws-sdk/client-s3");
 const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
+const crypto = require("crypto");
 const SERVER = process.env.SERVER;
 const accessKeyId = process.env.AWS_ACCESS_KEYID;
 const secretKey = process.env.AWS_SECRET_KEY;
@@ -140,19 +141,51 @@ const deleteTraining = asyncHandler(async(req,res)=>{
         return res.status(500).json("Internal server error");
     }
 });
+
 const editCourse = asyncHandler(async(req,res)=>{
-    let {courseId,course} = req.body;
-    course = JSON.parse(course);
-    console.log(courseId,course);
-    if(!courseId || !course || !Object.keys(course)){
+    let course = req.body;
+    // course = JSON.parse(course);
+    console.log(course);
+    console.log(req?.file)
+    if(!course || !Object.keys(course)){
         return res.status(400).json("no data");
     };
-    try{
-        await db.query(`update courses set ? where course_id = ?`,[course,courseId])
-        return res.status(200).json(`course edited`)
+    if(req?.file){
+        let imgBuffer = req?.file?.buffer;
+        const s3 = new S3Client({
+            region: regionName,
+            credentials: {
+                accessKeyId: accessKeyId,
+                secretAccessKey: secretKey,
+            },
+        });
+
+        const fileName = (bytes = 32) => crypto.randomBytes(bytes).toString("hex");
+        const filePath = `courseThumbnails/${fileName()}`;
+
+        const params = {
+            Bucket: bucketName,
+            Key: filePath,
+            Body: imgBuffer,
+            ContentType: req?.file?.mimetype,
+        };
+
+        try {
+            const command = new PutObjectCommand(params);
+            const response = await s3.send(command);
+            console.log("Object uploaded successfully:", response);
+            course["thumbnailawspath"] = filePath;
+        } catch (error) {
+            console.error("Error uploading object:", error);
+            return res.status(500).json("Error uploading object");
+        }
     }
-    catch(error){
-        console.error(error);
+
+    try {
+        await db.query(`UPDATE courses SET ? WHERE course_id = ?`, [course, course.course_id]);
+        return res.status(200).json("Course edited");
+    } catch (error) {
+        console.error("Database error:", error);
         return res.status(500).json("Internal server error");
     }
 });

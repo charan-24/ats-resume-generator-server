@@ -113,7 +113,7 @@ const generateResume = asyncHandler(async (req, res) => {
   // //collecting certificates
   // console.log(JSON.parse(resumereq?.certificates));
   let certificates = [];
-  if (resumereq.certificates) {
+  if (resumereq?.certificates?.length>0) {
     const certresult = await db.query(`select * from usercertificates where user_id = ?`, [
         parseInt(resumereq.user_id),
       ])
@@ -127,7 +127,7 @@ const generateResume = asyncHandler(async (req, res) => {
 
   // //collecting hobbies
   const hobbies = [];
-  if (resumereq.hobbies) {
+  if (resumereq.hobbies.length>0) {
     hobbies.push(resumereq.hobbies);
   }
   console.log(hobbies);
@@ -140,7 +140,7 @@ const generateResume = asyncHandler(async (req, res) => {
         { role: "system", content: `${systemcontent}` },
         {
           role: "user",
-          content: `Please generate a description of the work experience at ${workexp[i].company_name} where the user worked as a ${workexp[i].job_title}.Please provide a static response without dynamic placeholders and just respond with the content of the summary as string`,
+          content: `Please generate a description of the work experience at ${workexp[i].company_name} where the user worked as a ${workexp[i].job_title}.Please provide a static response without dynamic placeholders and just respond with the content of the summary as string end sentence in the given max_tokens`,
         },
       ],
       model: "gpt-3.5-turbo",
@@ -159,7 +159,7 @@ const generateResume = asyncHandler(async (req, res) => {
         { role: "system", content: `${systemcontent}` },
         {
           role: "user",
-          content: `Please generate a description of the ${projects[i].title} and regenrate the description which is ${projects[i].description}. Please provide a static response without dynamic placeholders and just respond with the content of the summary as string`,
+          content: `Please generate a description of the ${projects[i].title} and regenrate the description which is ${projects[i].description}. Please provide a static response without dynamic placeholders and just respond with the content of the summary as string and end sentence in the given max_tokens`,
         },
       ],
       model: "gpt-3.5-turbo",
@@ -219,14 +219,7 @@ const jsonToPdf = asyncHandler(async (req, res) => {
     Experience: [],
     Projects: [],
     Certifications: [],
-    // Extracurriculars: [
-    //   "Committee member of Turing Hut, the Programming Club at VNR VJIET. Developed visually appealing posters and created informative documents to enhance communication and promotion of club events. Organized and facilitated coding contests, workshops, created posters and made documents and peer-to-peer teaching sessions as part of the club’s initiatives.",
-    //   "Attended a 10 days Bootcamp conducted by the WE program. It covered self-learning tools, modern programming languages and corporate skills.",
-    // ],
-    // "Honors and Awards": [
-    //   "Awarded a scholarship for getting selected into the Women Engineers Program offered by TalentSprint, supported by Google which focuses on technical and corporate skills training. I am one of the top 1% of scholars selected from over 27,000+ eligible applicants across the country for this highly selective program.",
-    //   "Achieved third place in the Wiki Women Hackathon hosted at IIIT Hyderabad, showcasing strong collaborative skills, tech",
-    // ],
+    "Hobbies": jsondata.hobbies,
   };
   if (jsondata?.userdetails[0]?.linkedinurl) {
     resumeContent["Linkedin"] = jsondata?.userdetails[0].linkedinurl;
@@ -429,84 +422,95 @@ const jsonToPdf = asyncHandler(async (req, res) => {
   });
 
   // Add Education Section
-  generateHeading("Education");
-  generateLine();
-  resumeContent.Education.forEach((edu) => {
-    generateBulletPoint();
-    generateContent(capitalizeEachWord(edu.name), true);
-    generateRightAlignedContent(edu.Year);
-    resetAlignment();
-    if (edu.Branch) {
-      generateContent(`Branch: ${edu.Branch}`);
-    }
-    if (edu.Subjects) {
-      generateContent(`Subjects: ${edu.Subjects}`);
-    }
-    if (edu.CGPA) {
-      generateContent(`CGPA: ${edu.CGPA}`);
-    }
-    if (edu.Percentage) {
-      generateContent(`Percentage: ${edu.Percentage}`);
-    }
-    addNewLine(1.5);
-  });
+  if(resumeContent?.Education?.length>0){
+    generateHeading("Education");
+    generateLine();
+    resumeContent.Education.forEach((edu) => {
+      generateBulletPoint();
+      generateContent(capitalizeEachWord(edu.name), true);
+      generateRightAlignedContent(edu.Year);
+      resetAlignment();
+      if (edu.Branch) {
+        generateContent(`Branch: ${edu.Branch}`);
+      }
+      if (edu.Subjects) {
+        generateContent(`Subjects: ${edu.Subjects}`);
+      }
+      if (edu.CGPA) {
+        generateContent(`CGPA: ${edu.CGPA}`);
+      }
+      if (edu.Percentage) {
+        generateContent(`Percentage: ${edu.Percentage}`);
+      }
+      addNewLine(1.5);
+    });
+  }
 
   // Add Experience Section
-  generateHeading("Experience");
-  generateLine();
-  resumeContent.Experience.forEach((exp) => {
-    generateBulletPoint();
-    generateContent(capitalizeEachWord(exp.name), true);
-    generateRightAlignedContent(exp.Duration);
-    resetAlignment;
-    generateContent(exp.Role);
-    generateContent(capitalizeFirstLetterOfSentence(exp.Description));
-    addNewLine(1.5);
-  });
+  if(resumeContent?.Experience?.length>0){
+    generateHeading("Experience");
+    generateLine();
+    resumeContent.Experience.forEach((exp) => {
+      generateBulletPoint();
+      generateContent(capitalizeEachWord(exp.name), true);
+      generateRightAlignedContent(exp.Duration);
+      resetAlignment;
+      generateContent(exp.Role);
+      generateContent(capitalizeFirstLetterOfSentence(exp.Description));
+      addNewLine(1.5);
+    });
+  } 
 
   // Add Projects Section
-  generateHeading("Projects");
-  generateLine();
-  resumeContent.Projects.forEach((project) => {
-    generateBulletPoint();
-    generateContent(capitalizeEachWord(project.name), true);
-    addNewLine(1);
-    generateContent(capitalizeFirstLetterOfSentence(project.description));
-    addNewLine(1.5);
-  });
+  if(resumeContent?.Projects?.length>0){
+    generateHeading("Projects");
+    generateLine();
+    resumeContent.Projects.forEach((project) => {
+      generateBulletPoint();
+      generateContent(capitalizeEachWord(project.name), true);
+      addNewLine(1);
+      generateContent(capitalizeFirstLetterOfSentence(project.description));
+      addNewLine(1.5);
+    });
+  }
 
-  // Add Extracurriculars Section
-  generateHeading("Certifications");
-  generateLine();
-  resumeContent.Certifications.forEach((certificate) => {
-    generateBulletPoint();
-    generateContent(capitalizeFirstLetterOfSentence(certificate.name),true);
-    generateRightAlignedContent(capitalizeFirstLetterOfSentence(certificate.issuedby));
-    resetAlignment
-    addNewLine(1.5);
-  });
+  // Add Certifications Section
+  if(resumeContent?.Certifications?.length>0){
+    generateHeading("Certifications");
+    generateLine();
+    resumeContent.Certifications.forEach((certificate) => {
+      generateBulletPoint();
+      generateContent(capitalizeFirstLetterOfSentence(certificate.name),true);
+      generateRightAlignedContent(capitalizeFirstLetterOfSentence(certificate.issuedby));
+      resetAlignment
+      addNewLine(1.5);
+    });
+  }
 
-  // Add Honors and Awards Section
-  // generateHeading("Honors and Awards");
-  // generateLine();
-  // resumeContent["Honors and Awards"].forEach((award) => {
-  //   generateBulletPoint();
-  //   generateContent(capitalizeFirstLetterOfSentence(award));
-  //   addNewLine(1.5);
-  // });
+    // Add Skills Summary Section
+    if(resumeContent["Hobbies"].length>0){
+      generateHeading("Hobbies");
+      generateLine();
+      resumeContent["Hobbies"].forEach((hobby) => {
+        generateBulletPoint();
+        generateContent(hobby);
+        addNewLine(1.5);
+      });
+    }
 
-  addNewLine(1);
-  addNewLine(1);
-  addNewLine(1);
+  // addNewLine(1);
+  // addNewLine(1);
+  // addNewLine(1);
 
   // Add Declaration
-  doc
-    .fontSize(8)
-    .font("Times-Roman")
-    .text(
-      "*I hereby declare that the information given is true to the best of my knowledge"
-    )
-    .moveDown(0.5);
+  // doc
+  //   .fontSize(8)
+  //   .font("Times-Roman")
+  //   .text(
+  //     "*I hereby declare that the information given is true to the best of my knowledge"
+  //   )
+  //   .moveDown(0.5);
+
 
   const buffer = [];
   doc.on("data", function (chunk) {
